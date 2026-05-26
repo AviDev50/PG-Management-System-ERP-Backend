@@ -52,6 +52,23 @@ export const getSingleMealPlan = async (req, res) => {
   }
 };
 
+/*---------------- Today's Meal Plan ----------------*/
+export const getTodayMealPlan = async (req, res) => {
+  try {
+    const result = await mealPlanService.getTodayMealPlan(req.params.branch_id);
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 /*---------------- Update Meal Plan ----------------*/
 export const updateMealPlan = async (req, res) => {
   try {

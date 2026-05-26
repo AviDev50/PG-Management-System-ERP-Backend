@@ -49,9 +49,6 @@ export const checkBedOccupied = async (bed_id) => {
 /*--------------Create Tenant-----------*/
 
 export const createTenantQuery = async (data) => {
-  console.log("FULL DATA =", data);
-  console.log("ROOM ID BEFORE INSERT =", data.room_id);
-
   const query = `
     INSERT INTO tenants
     (

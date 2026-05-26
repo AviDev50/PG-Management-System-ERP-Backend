@@ -12,6 +12,10 @@ const getSingleMealPlan = async (id) => {
   return await mealPlanModel.getSingleMealPlan(id);
 };
 
+const getTodayMealPlan = async (branch_id) => {
+  return await mealPlanModel.getTodayMealPlan(branch_id);
+};
+
 const updateMealPlan = async (id, body) => {
   return await mealPlanModel.updateMealPlan(id, body);
 };
@@ -24,6 +28,7 @@ export default {
   createMealPlan,
   getMealPlans,
   getSingleMealPlan,
+  getTodayMealPlan,
   updateMealPlan,
   deleteMealPlan,
 };

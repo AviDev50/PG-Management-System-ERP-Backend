@@ -11,7 +11,6 @@ export const login = async ({ email, password }) => {
     throw new Error("Invalid email");
   }
 
-  // bcrypt password compare
   const isMatch = await bcrypt.compare(password, user.password_hash);
 
   if (!isMatch) {
@@ -19,7 +18,13 @@ export const login = async ({ email, password }) => {
   }
 
   const token = generateToken(user);
-  const branches = await getBranchesByPropertyId(user.property_id);
+
+  let branches = [];
+
+  // sirf admin/property owner ke liye branches lao
+  if (user.property_id) {
+    branches = await getBranchesByPropertyId(user.property_id);
+  }
 
   delete user.password_hash;
 
@@ -32,6 +37,8 @@ export const login = async ({ email, password }) => {
       role_id: user.role_id,
       role: user.role,
       property_id: user.property_id,
+      manager_id: user.manager_id || null,
+      branch_id: user.branch_id || null,
       branches,
     },
   };

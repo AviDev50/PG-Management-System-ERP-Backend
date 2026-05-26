@@ -1,5 +1,7 @@
 import userBranchService from "./userBranches.service.js";
 
+/*---------assign branch to manager-----------*/
+
 const assignUserBranch = async (req, res) => {
   try {
     const result = await userBranchService.assignUserBranch(req.body);
@@ -24,6 +26,7 @@ const assignUserBranch = async (req, res) => {
   }
 };
 
+/*------------Get All users Branches-------------------*/
 const getAllUserBranches = async (req, res) => {
   try {
     const result = await userBranchService.getAllUserBranches();
@@ -40,6 +43,8 @@ const getAllUserBranches = async (req, res) => {
   }
 };
 
+/*------------Get single  users Branches-------------------*/
+
 const getUserBranches = async (req, res) => {
   try {
     const result = await userBranchService.getUserBranches(req.params.user_id);
@@ -55,6 +60,8 @@ const getUserBranches = async (req, res) => {
     });
   }
 };
+
+/*----------------Delete users Branches-------------------*/
 
 const deleteUserBranch = async (req, res) => {
   try {

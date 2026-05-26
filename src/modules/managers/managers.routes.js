@@ -6,6 +6,8 @@ import {
   getSingleManager,
   updateManager,
   deleteManager,
+  getManagerPermissions,
+  updateManagerPermissions,
 } from "./managers.controller.js";
 
 import { verifyToken } from "../../common/middlewares/auth.middleware.js";
@@ -28,5 +30,21 @@ router.put("/update/:id", verifyToken, allowRoles("admin"), updateManager);
 
 /*---------------- Delete Manager ----------------*/
 router.delete("/delete/:id", verifyToken, allowRoles("admin"), deleteManager);
+
+/*---------------- Get Manager Permissions ----------------*/
+router.get(
+  "/permissions/:managerId",
+  verifyToken,
+  allowRoles("admin"),
+  getManagerPermissions,
+);
+
+/*---------------- Update Manager Permissions ----------------*/
+router.put(
+  "/permissions/:managerId",
+  verifyToken,
+  allowRoles("admin"),
+  updateManagerPermissions,
+);
 
 export default router;

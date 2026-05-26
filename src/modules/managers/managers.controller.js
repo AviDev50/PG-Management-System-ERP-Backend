@@ -93,3 +93,43 @@ export const deleteManager = async (req, res) => {
     });
   }
 };
+
+/*---------------- Get Manager Permissions ----------------*/
+export const getManagerPermissions = async (req, res) => {
+  try {
+    const result = await managerService.getManagerPermissions(
+      req.params.managerId,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+/*---------------- Update Manager Permissions ----------------*/
+export const updateManagerPermissions = async (req, res) => {
+  try {
+    const result = await managerService.updateManagerPermissions(
+      req.params.managerId,
+      req.body,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Permissions updated successfully",
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

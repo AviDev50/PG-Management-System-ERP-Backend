@@ -7,7 +7,7 @@ import {
   checkTenantOwnership,
   vacateTenantQuery,
   makeBedVacantQuery,
-  getTenantsByBranchQuery, 
+  getTenantsByBranchQuery,
 } from "./tenants.model.js";
 
 /*--------------Create Tenant-----------*/
@@ -176,4 +176,16 @@ export const getTenantCountByBranch = async (branch_id) => {
     total_tenants: tenants.length,
     tenants,
   };
+};
+
+/*-------Get Tenant By ID------------*/
+
+export const getTenantById = async (tenant_id) => {
+  const tenant = await getTenantByIdQuery(tenant_id);
+
+  if (!tenant) {
+    throw new Error("Tenant not found");
+  }
+
+  return tenant;
 };

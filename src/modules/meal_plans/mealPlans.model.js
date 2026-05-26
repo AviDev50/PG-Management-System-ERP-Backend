@@ -1,26 +1,59 @@
 import db from "../../common/config/db.js";
 
+/*---------------- Get Meal Plan By ID ----------------*/
+
+const getMealPlanById = async (meal_plan_id) => {
+  const [rows] = await db.query(
+    `
+      SELECT
+        mp.meal_plan_id,
+        mp.branch_id,
+        b.name AS branch_name,
+        mp.meal_date,
+        mp.name,
+        mp.breakfast,
+        mp.lunch,
+        mp.dinner,
+        mp.is_active,
+        mp.created_at,
+        mp.updated_at
+
+      FROM meal_plans mp
+
+      JOIN branches b
+        ON b.branch_id = mp.branch_id
+
+      WHERE mp.meal_plan_id = ?
+      LIMIT 1
+    `,
+    [meal_plan_id],
+  );
+
+  return rows[0];
+};
+
 /*---------------- Create Meal Plan ----------------*/
 
 const createMealPlan = async (data) => {
-  const { branch_id, name, breakfast, lunch, dinner } = data;
+  const { branch_id, meal_date, name, breakfast, lunch, dinner } = data;
 
   const [result] = await db.query(
     `
       INSERT INTO meal_plans
       (
         branch_id,
+        meal_date,
         name,
         breakfast,
         lunch,
         dinner
       )
-      VALUES (?, ?, ?, ?, ?)
-      `,
-    [branch_id, name, breakfast, lunch, dinner],
+      VALUES (?, ?, ?, ?, ?, ?)
+    `,
+    [branch_id, meal_date, name, breakfast, lunch, dinner],
   );
 
-  return result;
+  return await getMealPlanById(result.insertId);
 };
 
 /*---------------- Get Meal Plans ----------------*/
@@ -30,13 +63,16 @@ const getMealPlans = async () => {
     `
       SELECT
         mp.meal_plan_id,
-        b.branch_id,
+        mp.branch_id,
         b.name AS branch_name,
+        mp.meal_date,
         mp.name,
         mp.breakfast,
         mp.lunch,
         mp.dinner,
-        mp.is_active
+        mp.is_active,
+        mp.created_at,
+        mp.updated_at
 
       FROM meal_plans mp
 
@@ -45,8 +81,9 @@ const getMealPlans = async () => {
 
       WHERE mp.deleted_at IS NULL
 
-      ORDER BY mp.meal_plan_id DESC
-      `,
+      ORDER BY mp.meal_date DESC,
+               mp.meal_plan_id DESC
+    `,
   );
 
   return rows;
@@ -59,13 +96,16 @@ const getSingleMealPlan = async (id) => {
     `
       SELECT
         mp.meal_plan_id,
-        b.branch_id,
+        mp.branch_id,
         b.name AS branch_name,
+        mp.meal_date,
         mp.name,
         mp.breakfast,
         mp.lunch,
         mp.dinner,
-        mp.is_active
+        mp.is_active,
+        mp.created_at,
+        mp.updated_at
 
       FROM meal_plans mp
 
@@ -73,8 +113,44 @@ const getSingleMealPlan = async (id) => {
         ON b.branch_id = mp.branch_id
 
       WHERE mp.meal_plan_id = ?
-      `,
+      LIMIT 1
+    `,
     [id],
+  );
+
+  return rows[0];
+};
+
+/*---------------- Get Today's Meal Plan ----------------*/
+
+const getTodayMealPlan = async (branch_id) => {
+  const [rows] = await db.query(
+    `
+      SELECT
+        mp.meal_plan_id,
+        mp.branch_id,
+        b.name AS branch_name,
+        mp.meal_date,
+        mp.name,
+        mp.breakfast,
+        mp.lunch,
+        mp.dinner,
+        mp.is_active,
+        mp.created_at,
+        mp.updated_at
+
+      FROM meal_plans mp
+
+      JOIN branches b
+        ON b.branch_id = mp.branch_id
+
+      WHERE mp.branch_id = ?
+      AND mp.meal_date = CURDATE()
+      AND mp.deleted_at IS NULL
+
+      LIMIT 1
+    `,
+    [branch_id],
   );
 
   return rows[0];
@@ -83,22 +159,23 @@ const getSingleMealPlan = async (id) => {
 /*---------------- Update Meal Plan ----------------*/
 
 const updateMealPlan = async (id, data) => {
-  const { name, breakfast, lunch, dinner } = data;
+  const { meal_date, name, breakfast, lunch, dinner } = data;
 
-  const [result] = await db.query(
+  await db.query(
     `
       UPDATE meal_plans
       SET
+        meal_date = ?,
         name = ?,
         breakfast = ?,
         lunch = ?,
         dinner = ?
       WHERE meal_plan_id = ?
-      `,
-    [name, breakfast, lunch, dinner, id],
+    `,
+    [meal_date, name, breakfast, lunch, dinner, id],
   );
 
-  return result;
+  return await getMealPlanById(id);
 };
 
 /*---------------- Delete Meal Plan ----------------*/
@@ -108,7 +185,7 @@ const deleteMealPlan = async (id) => {
     `
       DELETE FROM meal_plans
       WHERE meal_plan_id = ?
-      `,
+    `,
     [id],
   );
 
@@ -119,6 +196,8 @@ export default {
   createMealPlan,
   getMealPlans,
   getSingleMealPlan,
+  getTodayMealPlan,
   updateMealPlan,
   deleteMealPlan,
+  getMealPlanById,
 };

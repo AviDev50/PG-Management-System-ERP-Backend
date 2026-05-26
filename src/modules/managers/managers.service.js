@@ -20,10 +20,22 @@ const deleteManager = async (id) => {
   return await managerModel.deleteManager(id);
 };
 
+/*---------------- Get Manager Permissions ----------------*/
+const getManagerPermissions = async (managerId) => {
+  return await managerModel.getManagerPermissions(managerId);
+};
+
+/*---------------- Update Manager Permissions ----------------*/
+const updateManagerPermissions = async (managerId, body) => {
+  return await managerModel.updateManagerPermissions(managerId, body);
+};
+
 export default {
   createManager,
   getManagers,
   getSingleManager,
   updateManager,
   deleteManager,
+  getManagerPermissions,
+  updateManagerPermissions,
 };
