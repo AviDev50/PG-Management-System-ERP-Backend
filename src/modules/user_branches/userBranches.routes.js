@@ -32,9 +32,9 @@ router.get(
   userBranchController.getUserBranches,
 );
 
-/*------------------Delete User Branch-------------*/
+/*------------------Delete User Branch  id-------------*/
 router.delete(
-  "/delete/:id",
+  "/delete/:user_branch_id",
   verifyToken,
   allowRoles("admin"),
   userBranchController.deleteUserBranch,

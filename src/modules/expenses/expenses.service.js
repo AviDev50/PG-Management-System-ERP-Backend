@@ -4,6 +4,7 @@ import {
   createExpenseQuery,
   getExpensesQuery,
   checkBranchOwnership,
+
 } from "./expenses.model.js";
 
 /*--------------Create Expense Category-----------*/
@@ -27,46 +28,42 @@ export const getExpenseCategories = async () => {
 export const createExpense = async (payload, user) => {
   const {
     branch_id,
-
     expense_category_id,
-
     amount,
-
     expense_date,
-
     description,
-
     receipt_url,
   } = payload;
 
-  /*
-    |--------------------------------------------------------------------------
-    | Check Branch Ownership
-    |--------------------------------------------------------------------------
-    */
-
-  const branch = await checkBranchOwnership(branch_id, user.user_id);
+  const branch = await checkBranchOwnership(
+    branch_id,
+    user.user_id
+  );
 
   if (!branch) {
-    throw new Error("Branch not found");
+    throw new Error(
+      "Branch not found or you are not authorized"
+    );
   }
 
-  await createExpenseQuery({
+  const result = await createExpenseQuery({
     branch_id,
-
     expense_category_id,
-
     amount,
-
     expense_date,
-
     description,
-
     receipt_url,
   });
 
-  return null;
+  return result;
 };
+
+
+
+
+
+
+
 
 /*--------------Get Expenses-----------*/
 

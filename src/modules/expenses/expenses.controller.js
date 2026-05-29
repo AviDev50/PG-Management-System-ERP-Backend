@@ -33,6 +33,7 @@ export const getExpenseCategories = async (req, res) => {
 /*--------------Create Expense-----------*/
 
 export const createExpense = async (req, res) => {
+  console.log(req.user);
   try {
     const data = await expensesService.createExpense(req.body, req.user);
 
