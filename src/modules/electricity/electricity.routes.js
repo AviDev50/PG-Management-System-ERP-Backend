@@ -10,19 +10,23 @@ import {
   markBillPaid,
 } from "./electricity.controller.js";
 
-// Add Reading
-router.post("/add-reading", addElectricityReading);
+/*--------------------- Create Electricity Reading---------*/
 
-// Get Readings
+router.post("/readings", addElectricityReading);
+
+/*--------------------- Get All Electricity Readings--------------*/
+
 router.get("/readings", getElectricityReadings);
 
-// Generate Tenant Bills
-router.post("/generate-bills/:reading_id", generateTenantBills);
+/*----------------------Generate Tenant Bills----------------------*/
 
-// Get Tenant Bills
-router.get("/tenant-bills", getTenantBills);
+router.post("/readings/:reading_id/generate-bills", generateTenantBills);
 
-// Mark Bill Paid
-router.put("/bill-paid/:bill_id", markBillPaid);
+/*----------------------Get All Tenant Bills------------------------*/
+router.get("/bills", getTenantBills);
+
+/*--------------------Mark Bill As Paid------------------------------*/
+
+router.put("/bills/:bill_id/pay", markBillPaid);
 
 export default router;

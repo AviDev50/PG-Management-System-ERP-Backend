@@ -41,6 +41,7 @@ export const getPaymentById = async (req, res) => {
   }
 };
 
+
 /*--------------UPDATE PAYMENT---------------*/
 
 export const updatePayment = async (req, res) => {
@@ -82,6 +83,32 @@ export const getTenantPaymentHistory = async (req, res) => {
     );
 
     return successResponse(res, data, "Payment history fetched successfully");
+  } catch (error) {
+    return errorResponse(res, error.message);
+  }
+};
+
+
+
+
+/*===========================================================================
+|
+| GET MONTHLY SUMMARY
+|
+===========================================================================*/
+
+export const getMonthlySummary = async (req, res) => {
+  try {
+    const data = await paymentsService.getMonthlySummary(
+      req.user,
+      req.query
+    );
+
+    return successResponse(
+      res,
+      data,
+      "Monthly summary fetched successfully"
+    );
   } catch (error) {
     return errorResponse(res, error.message);
   }

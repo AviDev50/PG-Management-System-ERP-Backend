@@ -286,3 +286,83 @@ export const getTenantPaymentHistoryQuery = async (tenant_id) => {
 
   return results;
 };
+
+/*===========================================================================
+|
+| GET MONTHLY SUMMARY QUERY
+|
+| Returns:
+| - Total Collection
+| - Pending Dues
+| - Overdue Tenants
+|
+===========================================================================*/
+
+export const getMonthlySummaryQuery = async (user_id, filters = {}) => {
+  const { branch_id, month } = filters;
+
+  let query = `
+    SELECT
+
+      COALESCE(
+        SUM(
+          CASE
+            WHEN payments.status = 'paid'
+            THEN payments.amount
+            ELSE 0
+          END
+        ),
+        0
+      ) AS total_collection,
+
+      COALESCE(
+        SUM(
+          CASE
+            WHEN payments.status = 'pending'
+            THEN payments.amount
+            ELSE 0
+          END
+        ),
+        0
+      ) AS pending_dues,
+
+      COUNT(
+        DISTINCT CASE
+          WHEN payments.status = 'pending'
+          THEN payments.tenant_id
+        END
+      ) AS overdue_tenants
+
+    FROM payments
+
+    JOIN branches
+      ON branches.branch_id = payments.branch_id
+
+    JOIN properties
+      ON properties.property_id = branches.property_id
+
+    WHERE properties.user_id = ?
+    AND payments.deleted_at IS NULL
+  `;
+
+  const params = [user_id];
+
+  if (branch_id) {
+    query += ` AND payments.branch_id = ?`;
+    params.push(branch_id);
+  }
+
+  if (month) {
+    query += `
+      AND DATE_FORMAT(
+        payments.billing_month,
+        '%Y-%m'
+      ) = ?
+    `;
+    params.push(month);
+  }
+
+  const [results] = await db.query(query, params);
+
+  return results[0];
+};

@@ -6,6 +6,7 @@ import {
   updatePaymentQuery,
   deletePaymentQuery,
   getTenantPaymentHistoryQuery,
+  getMonthlySummaryQuery,
 } from "./payments.model.js";
 
 /*===========================================================================
@@ -162,4 +163,21 @@ export const getTenantPaymentHistory = async (tenant_id, user) => {
   }
 
   return await getTenantPaymentHistoryQuery(tenant_id);
+};
+
+
+/*===========================================================================
+|
+| GET MONTHLY SUMMARY
+|
+===========================================================================*/
+
+export const getMonthlySummary = async (
+  user,
+  filters
+) => {
+  return await getMonthlySummaryQuery(
+    user.user_id,
+    filters
+  );
 };

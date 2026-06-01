@@ -7,6 +7,7 @@ import {
   updatePayment,
   deletePayment,
   getTenantPaymentHistory,
+  getMonthlySummary
 } from "./payments.controller.js";
 
 import { verifyToken } from "../../common/middlewares/auth.middleware.js";
@@ -49,6 +50,14 @@ router.get(
   verifyToken,
   allowRoles("admin"),
   getTenantPaymentHistory,
+);
+
+/*-------------GET MONTHLY SUMMARY------------------*/
+router.get(
+  "/summary",
+  verifyToken,
+  allowRoles("admin"),
+  getMonthlySummary
 );
 
 /*===========================================================================
