@@ -6,6 +6,8 @@ import {
   getComplaintById,
   getComplaintsQuery,
   resolveComplaintQuery,
+  updateComplaintQuery,
+  deleteComplaintQuery,
 } from "./complaints.model.js";
 
 /*===========================================================================
@@ -16,12 +18,7 @@ import {
 ===========================================================================*/
 
 export const createComplaint = async (payload) => {
-  const {
-    tenant_id,
-    title,
-    description,
-    category,
-  } = payload;
+  const { tenant_id, title, description, category } = payload;
 
   /*--------------------------------------------------
   | CHECK TENANT
@@ -34,9 +31,7 @@ export const createComplaint = async (payload) => {
   }
 
   if (!tenant.room_id) {
-    throw new Error(
-      "Tenant is not assigned to any room"
-    );
+    throw new Error("Tenant is not assigned to any room");
   }
 
   /*--------------------------------------------------
@@ -56,9 +51,7 @@ export const createComplaint = async (payload) => {
   | FETCH CREATED COMPLAINT
   --------------------------------------------------*/
 
-  const complaint = await getComplaintById(
-    result.insertId
-  );
+  const complaint = await getComplaintById(result.insertId);
 
   return complaint;
 };
@@ -81,7 +74,54 @@ export const getComplaints = async () => {
 
 ===========================================================================*/
 
-export const resolveComplaint = async (
+export const resolveComplaint = async (complaint_id) => {
+  const complaint = await getComplaintById(complaint_id);
+
+  if (!complaint) {
+    throw new Error("Complaint not found");
+  }
+
+  const result = await resolveComplaintQuery(complaint_id);
+
+  if (result.affectedRows === 0) {
+    throw new Error("Complaint not resolved");
+  }
+
+  return {
+    complaint_id,
+    status: "resolved",
+  };
+};
+
+
+
+/*-------------Update Complain--------------*/
+
+export const updateComplaint = async (
+  complaint_id,
+  payload
+) => {
+  const complaint = await getComplaintById(
+    complaint_id
+  );
+
+  if (!complaint) {
+    throw new Error("Complaint not found");
+  }
+
+  await updateComplaintQuery(
+    complaint_id,
+    payload
+  );
+
+  return await getComplaintById(
+    complaint_id
+  );
+};
+
+
+/*-----------Delete Complaint---------------*/
+export const deleteComplaint = async (
   complaint_id
 ) => {
   const complaint = await getComplaintById(
@@ -92,16 +132,9 @@ export const resolveComplaint = async (
     throw new Error("Complaint not found");
   }
 
-  const result = await resolveComplaintQuery(
+  await deleteComplaintQuery(
     complaint_id
   );
 
-  if (result.affectedRows === 0) {
-    throw new Error("Complaint not resolved");
-  }
-
-  return {
-    complaint_id,
-    status: "resolved",
-  };
+  return complaint;
 };

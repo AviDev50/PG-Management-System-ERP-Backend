@@ -96,15 +96,25 @@ export const createBranchQuery = async (data) => {
 
 export const getBranchByIdQuery = async (branch_id) => {
   const query = `
-    SELECT
-      b.*,
-      COUNT(r.room_id) AS total_rooms
-    FROM branches b
-    LEFT JOIN rooms r
-      ON r.branch_id = b.branch_id
-    WHERE b.branch_id = ?
-    GROUP BY b.branch_id
-  `;
+SELECT
+  b.*,
+  COUNT(DISTINCT r.room_id) AS total_rooms,
+
+  u.user_id AS manager_id,
+  u.name AS manager_name
+
+FROM branches b
+
+LEFT JOIN rooms r
+  ON r.branch_id = b.branch_id
+
+LEFT JOIN users u
+  ON u.user_id = b.manager_id
+
+WHERE b.branch_id = ?
+
+GROUP BY b.branch_id
+`;
 
   const [results] = await db.query(query, [branch_id]);
 
@@ -123,16 +133,27 @@ export const getBranchByIdQuery = async (branch_id) => {
 
 export const getBranchesQuery = async () => {
   const query = `
-    SELECT
-      b.*,
-      COUNT(r.room_id) AS total_rooms
-    FROM branches b
-    LEFT JOIN rooms r
-      ON r.branch_id = b.branch_id
-    WHERE b.deleted_at IS NULL
-    GROUP BY b.branch_id
-    ORDER BY b.branch_id DESC
-  `;
+SELECT
+  b.*,
+  COUNT(DISTINCT r.room_id) AS total_rooms,
+
+  u.user_id AS manager_id,
+  u.name AS manager_name
+
+FROM branches b
+
+LEFT JOIN rooms r
+  ON r.branch_id = b.branch_id
+
+LEFT JOIN users u
+  ON u.user_id = b.manager_id
+
+WHERE b.deleted_at IS NULL
+
+GROUP BY b.branch_id
+
+ORDER BY b.branch_id DESC
+`;
 
   const [results] = await db.query(query);
 
@@ -247,16 +268,27 @@ export const deleteBranchQuery = async (branch_id) => {
 
 export const getBranchesByPropertyIdQuery = async (property_id) => {
   const query = `
-    SELECT
-      b.*,
-      COUNT(r.room_id) AS total_rooms
-    FROM branches b
-    LEFT JOIN rooms r
-      ON r.branch_id = b.branch_id
-    WHERE b.property_id = ?
-      AND b.deleted_at IS NULL
-    GROUP BY b.branch_id
-    ORDER BY b.branch_id DESC
+   SELECT
+  b.*,
+  COUNT(DISTINCT r.room_id) AS total_rooms,
+
+  u.user_id AS manager_id,
+  u.name AS manager_name
+
+FROM branches b
+
+LEFT JOIN rooms r
+  ON r.branch_id = b.branch_id
+
+LEFT JOIN users u
+  ON u.user_id = b.manager_id
+
+WHERE b.property_id = ?
+  AND b.deleted_at IS NULL
+
+GROUP BY b.branch_id
+
+ORDER BY b.branch_id DESC
   `;
 
   const [results] = await db.query(query, [property_id]);

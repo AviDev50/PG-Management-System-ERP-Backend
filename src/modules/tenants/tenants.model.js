@@ -244,9 +244,17 @@ export const makeBedVacantQuery = async (bed_id) => {
 /*-------------Get data when we create tenant------------*/
 export const getTenantByIdQuery = async (tenant_id) => {
   const query = `
-    SELECT *
+    SELECT
+      tenants.*,
+      beds.label AS bed_name,
+      beds.bed_type,
+      beds.bed_monthly_rent
     FROM tenants
-    WHERE tenant_id = ?
+
+    LEFT JOIN beds
+      ON beds.bed_id = tenants.bed_id
+
+    WHERE tenants.tenant_id = ?
     LIMIT 1
   `;
 
@@ -268,4 +276,110 @@ export const getTenantsByBranchQuery = async (branch_id) => {
   const [rows] = await db.query(query, [branch_id]);
 
   return rows;
+};
+
+/*--------------Update Tenant Details-----------------*/
+
+export const updateTenantQuery = async (tenant_id, data) => {
+  const query = `
+    UPDATE tenants
+    SET
+      first_name = ?,
+      last_name = ?,
+      profile_image = ?,
+
+      phone = ?,
+      email = ?,
+
+      gender = ?,
+      dob = ?,
+      marital_status = ?,
+      profession = ?,
+
+      document_image = ?,
+
+      address = ?,
+      state = ?,
+      district = ?,
+      pincode = ?,
+
+      college_name = ?,
+      registration_date = ?,
+accommodation_date = ?,
+
+      father_name = ?,
+      father_contact = ?,
+      father_occupation = ?,
+
+      mother_name = ?,
+      mother_contact = ?,
+      mother_occupation = ?,
+
+      guardian_name = ?,
+      guardian_relation = ?,
+      guardian_contact = ?,
+
+      security_deposit = ?,
+      emergency_contact = ?
+
+    WHERE tenant_id = ?
+  `;
+
+  const [result] = await db.query(query, [
+    data.first_name,
+    data.last_name,
+    data.profile_image,
+
+    data.phone,
+    data.email,
+
+    data.gender,
+    data.dob,
+    data.marital_status,
+    data.profession,
+
+    data.document_image,
+
+    data.address,
+    data.state,
+    data.district,
+    data.pincode,
+
+    data.college_name,
+    data.registration_date,
+    data.accommodation_date,
+
+    data.father_name,
+    data.father_contact,
+    data.father_occupation,
+
+    data.mother_name,
+    data.mother_contact,
+    data.mother_occupation,
+
+    data.guardian_name,
+    data.guardian_relation,
+    data.guardian_contact,
+
+    data.security_deposit,
+    data.emergency_contact,
+
+    tenant_id,
+  ]);
+
+  return result;
+};
+
+/*--------------Delete Tenant-----------*/
+
+export const deleteTenantQuery = async (tenant_id) => {
+  const query = `
+    UPDATE tenants
+    SET deleted_at = NOW()
+    WHERE tenant_id = ?
+  `;
+
+  const [result] = await db.query(query, [tenant_id]);
+
+  return result;
 };

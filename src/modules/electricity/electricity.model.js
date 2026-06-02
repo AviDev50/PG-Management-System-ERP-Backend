@@ -7,16 +7,18 @@ export const createElectricityReading = async (data) => {
   const sql = `
     INSERT INTO electricity_readings
     (
+      branch_id,
       room_id,
       start_reading,
       end_reading,
       unit_price,
       bill_month
     )
-    VALUES (?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?)
   `;
 
   const values = [
+    data.branch_id,
     data.room_id,
     data.start_reading,
     data.end_reading,
@@ -35,15 +37,47 @@ export const createElectricityReading = async (data) => {
 /*===========================================================================
 | GET ALL ELECTRICITY READINGS
 ===========================================================================*/
-export const getElectricityReadingsModel = async () => {
-  const sql = `
-    SELECT *
-    FROM electricity_readings
-    WHERE deleted_at IS NULL
-    ORDER BY reading_id DESC
+export const getElectricityReadingsModel = async (filters) => {
+  let sql = `
+    SELECT
+      er.*,
+      r.room_number
+    FROM electricity_readings er
+    LEFT JOIN rooms r
+      ON r.room_id = er.room_id
+    WHERE er.deleted_at IS NULL
   `;
 
-  const [rows] = await db.query(sql);
+  const values = [];
+
+  if (filters.branch_id) {
+    sql += ` AND er.branch_id = ?`;
+    values.push(filters.branch_id);
+  }
+
+  if (filters.room_id) {
+    sql += ` AND er.room_id = ?`;
+    values.push(filters.room_id);
+  }
+
+  if (filters.bill_month) {
+    sql += ` AND er.bill_month = ?`;
+    values.push(filters.bill_month);
+  }
+
+  if (filters.start_date) {
+    sql += ` AND DATE(er.created_at) >= ?`;
+    values.push(filters.start_date);
+  }
+
+  if (filters.end_date) {
+    sql += ` AND DATE(er.created_at) <= ?`;
+    values.push(filters.end_date);
+  }
+
+  sql += ` ORDER BY er.reading_id DESC`;
+
+  const [rows] = await db.query(sql, values);
 
   return rows;
 };
@@ -132,18 +166,24 @@ export const generateTenantBillsModel = async (reading_id) => {
       continue;
     }
 
-    await db.query(
-      `
-      INSERT INTO tenant_electricity_bills
-      (
-        tenant_id,
-        reading_id,
-        amount
-      )
-      VALUES (?, ?, ?)
-      `,
-      [tenant.tenant_id, reading_id, perTenantAmount]
-    );
+await db.query(
+  `
+  INSERT INTO tenant_electricity_bills
+  (
+    tenant_id,
+    reading_id,
+    branch_id,
+    amount
+  )
+  VALUES (?, ?, ?, ?)
+  `,
+  [
+    tenant.tenant_id,
+    reading_id,
+    reading.branch_id,
+    perTenantAmount,
+  ]
+);
 
     insertedBills++;
   }
@@ -164,10 +204,11 @@ export const generateTenantBillsModel = async (reading_id) => {
 | Returns tenant-wise electricity bills.
 |
 ===========================================================================*/
-export const getTenantBillsModel = async () => {
-  const sql = `
+export const getTenantBillsModel = async (filters) => {
+  let sql = `
     SELECT
       teb.bill_id,
+      teb.branch_id,
       teb.amount,
       teb.status,
       teb.paid_at,
@@ -191,14 +232,52 @@ export const getTenantBillsModel = async () => {
 
     WHERE teb.deleted_at IS NULL
     AND t.deleted_at IS NULL
-
-    ORDER BY teb.bill_id DESC
   `;
 
-  const [rows] = await db.query(sql);
+  const values = [];
+
+  if (filters.branch_id) {
+    sql += ` AND teb.branch_id = ?`;
+    values.push(filters.branch_id);
+  }
+
+  if (filters.tenant_id) {
+    sql += ` AND teb.tenant_id = ?`;
+    values.push(filters.tenant_id);
+  }
+
+  if (filters.status) {
+    sql += ` AND teb.status = ?`;
+    values.push(filters.status);
+  }
+
+  if (filters.bill_month) {
+    sql += ` AND er.bill_month = ?`;
+    values.push(filters.bill_month);
+  }
+
+  if (filters.start_date) {
+  sql += ` AND DATE(teb.created_at) >= ?`;
+  values.push(filters.start_date);
+}
+
+if (filters.end_date) {
+  sql += ` AND DATE(teb.created_at) <= ?`;
+  values.push(filters.end_date);
+}
+  sql += ` ORDER BY teb.bill_id DESC`;
+
+  const [rows] = await db.query(sql, values);
 
   return rows;
 };
+
+
+
+
+
+
+
 
 /*===========================================================================
 | MARK ELECTRICITY BILL AS PAID

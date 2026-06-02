@@ -23,18 +23,12 @@ export const getBranches = async (branch_id = null) => {
   let branches = await getBranchesQuery();
 
   if (branch_id) {
-    branches = branches.filter(
-      (b) => b.branch_id == branch_id
-    );
+    branches = branches.filter((b) => b.branch_id == branch_id);
   }
 
-  const active = branches.filter(
-    (b) => b.approval_status === "approved"
-  );
+  const active = branches.filter((b) => b.approval_status === "approved");
 
-  const pending = branches.filter(
-    (b) => b.approval_status === "pending"
-  );
+  const pending = branches.filter((b) => b.approval_status === "pending");
 
   return {
     active_count: active.length,
@@ -85,15 +79,19 @@ export const deleteBranch = async (branch_id) => {
   };
 };
 
-
-
 /*---------Get Branches By Property id-----*/
 
 export const getBranchesByPropertyId = async (property_id) => {
   const branches = await getBranchesByPropertyIdQuery(property_id);
 
+  const active = branches.filter((b) => b.approval_status === "approved");
+
+  const pending = branches.filter((b) => b.approval_status === "pending");
+
   return {
-    total_branches: branches.length,
-    branches,
+    active_count: active.length,
+    pending_count: pending.length,
+    active,
+    pending,
   };
 };

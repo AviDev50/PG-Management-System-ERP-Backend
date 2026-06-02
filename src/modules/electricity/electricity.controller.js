@@ -1,17 +1,13 @@
-import {
-  addElectricityReadingService,
-  getElectricityReadingsService,
-  generateTenantBillsService,
-  getTenantBillsService,
-  markBillPaidService,
-} from "./electricity.service.js";
+import * as electricityService from "./electricity.service.js";
 
 /*===========================================================================
 | ADD ELECTRICITY READING
 ===========================================================================*/
 export const addElectricityReading = async (req, res) => {
   try {
-    const result = await addElectricityReadingService(req.body);
+    const result = await electricityService.addElectricityReadingService(
+      req.body
+    );
 
     return res.status(201).json({
       success: true,
@@ -27,13 +23,12 @@ export const addElectricityReading = async (req, res) => {
 };
 
 /*===========================================================================
-|
 | GET ALL ELECTRICITY READINGS
-|
 ===========================================================================*/
 export const getElectricityReadings = async (req, res) => {
   try {
-    const result = await getElectricityReadingsService();
+    const result =
+      await electricityService.getElectricityReadingsService(req.query);
 
     return res.status(200).json({
       success: true,
@@ -49,15 +44,14 @@ export const getElectricityReadings = async (req, res) => {
 };
 
 /*===========================================================================
-|
 | GENERATE TENANT ELECTRICITY BILLS
-| Splits room bill equally among active tenants.
 ===========================================================================*/
 export const generateTenantBills = async (req, res) => {
   try {
     const { reading_id } = req.params;
 
-    const result = await generateTenantBillsService(reading_id);
+    const result =
+      await electricityService.generateTenantBillsService(reading_id);
 
     return res.status(201).json({
       success: true,
@@ -73,13 +67,12 @@ export const generateTenantBills = async (req, res) => {
 };
 
 /*===========================================================================
-|
-| GET ALL TENANT ELECTRICITY BILLS
-| Returns tenant-wise electricity bills.
+| GET TENANT ELECTRICITY BILLS
 ===========================================================================*/
 export const getTenantBills = async (req, res) => {
   try {
-    const result = await getTenantBillsService();
+    const result =
+      await electricityService.getTenantBillsService(req.query);
 
     return res.status(200).json({
       success: true,
@@ -95,15 +88,14 @@ export const getTenantBills = async (req, res) => {
 };
 
 /*===========================================================================
-|
-| MARK ELECTRICITY BILL AS PAID
-| Updates bill status to paid.
+| MARK BILL AS PAID
 ===========================================================================*/
 export const markBillPaid = async (req, res) => {
   try {
     const { bill_id } = req.params;
 
-    const result = await markBillPaidService(bill_id);
+    const result =
+      await electricityService.markBillPaidService(bill_id);
 
     return res.status(200).json({
       success: true,

@@ -5,7 +5,9 @@ import {
   getTenantCountByBranch,
   getTenants,
   vacateTenant,
-  getTenantById
+  getTenantById,
+  updateTenant,
+  deleteTenant,
 } from "./tenants.controller.js";
 
 const router = express.Router();
@@ -22,12 +24,19 @@ router.get("/", getTenants);
 
 router.put("/vacate/:id", vacateTenant);
 
-
 /*-------get Tenant By branch id------------*/
 
 router.get("/branch/:branch_id", getTenantCountByBranch);
 /*-------Get Tenant By ID------------*/
 
 router.get("/:tenant_id", getTenantById);
+
+/*--------------Update Tenant-----------*/
+
+router.put("/:tenant_id", updateTenant);
+
+/*--------------Delete Tenant-----------*/
+
+router.delete("/:tenant_id", deleteTenant);
 
 export default router;

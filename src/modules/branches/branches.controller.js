@@ -62,7 +62,6 @@ export const deleteBranch = async (req, res) => {
   }
 };
 
-
 /*---------Get Branches By Property id-----*/
 
 export const getBranchesByPropertyId = async (req, res) => {
@@ -71,11 +70,7 @@ export const getBranchesByPropertyId = async (req, res) => {
 
     const data = await branchesService.getBranchesByPropertyId(property_id);
 
-    return successResponse(
-      res,
-      data,
-      "Branches fetched successfully"
-    );
+    return successResponse(res, data, "Branches fetched successfully");
   } catch (error) {
     return errorResponse(res, error.message);
   }

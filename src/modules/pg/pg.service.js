@@ -39,7 +39,7 @@ export const createProperty = async (payload) => {
 
     const defaultPassword = "PG@321";
 
-    // password hash 
+    // password hash
     const password_hash = await bcrypt.hash(defaultPassword, 10);
 
     const userResult = await createUserQuery({

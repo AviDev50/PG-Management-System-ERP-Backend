@@ -28,8 +28,6 @@ export const getTenantById = async (tenant_id) => {
 /*===========================================================================
 
 | CREATE COMPLAINT QUERY
-| Complaint database me insert karta hai
-
 ===========================================================================*/
 
 export const createComplaintQuery = async (data) => {
@@ -111,10 +109,7 @@ export const getComplaintsQuery = async () => {
 };
 
 /*===========================================================================
-
 | GET SINGLE COMPLAINT
-| Complaint ID se single complaint laata hai
-
 ===========================================================================*/
 
 export const getComplaintById = async (complaint_id) => {
@@ -179,6 +174,52 @@ export const resolveComplaintQuery = async (complaint_id) => {
   `;
 
   const [result] = await db.query(query, [complaint_id]);
+
+  return result;
+};
+
+
+
+/*-------------Update Complaint-------------------*/
+export const updateComplaintQuery = async (
+  complaint_id,
+  data
+) => {
+  const query = `
+    UPDATE complaints
+    SET
+      title = ?,
+      description = ?,
+      category = ?,
+      updated_at = NOW()
+    WHERE complaint_id = ?
+  `;
+
+  const [result] = await db.query(query, [
+    data.title,
+    data.description,
+    data.category,
+    complaint_id,
+  ]);
+
+  return result;
+};
+
+
+/*-----------Delete Complaints-------------*/
+export const deleteComplaintQuery = async (
+  complaint_id
+) => {
+  const query = `
+    UPDATE complaints
+    SET
+      deleted_at = NOW()
+    WHERE complaint_id = ?
+  `;
+
+  const [result] = await db.query(query, [
+    complaint_id,
+  ]);
 
   return result;
 };

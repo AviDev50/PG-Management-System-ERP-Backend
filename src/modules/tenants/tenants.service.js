@@ -8,6 +8,8 @@ import {
   vacateTenantQuery,
   makeBedVacantQuery,
   getTenantsByBranchQuery,
+  updateTenantQuery,
+  deleteTenantQuery,
 } from "./tenants.model.js";
 
 /*--------------Create Tenant-----------*/
@@ -172,9 +174,30 @@ export const vacateTenant = async (tenant_id) => {
 export const getTenantCountByBranch = async (branch_id) => {
   const tenants = await getTenantsByBranchQuery(branch_id);
 
+  const active = tenants.filter(
+    (tenant) => tenant.status?.toLowerCase() === "active",
+  );
+
+  const pending = tenants.filter(
+    (tenant) => tenant.status?.toLowerCase() === "pending",
+  );
+
+  const release = tenants.filter(
+    (tenant) =>
+      tenant.status?.toLowerCase() === "release" ||
+      tenant.status?.toLowerCase() === "vacated",
+  );
+
   return {
     total_tenants: tenants.length,
-    tenants,
+
+    active_count: active.length,
+    pending_count: pending.length,
+    release_count: release.length,
+
+    active,
+    pending,
+    release,
   };
 };
 
@@ -186,6 +209,37 @@ export const getTenantById = async (tenant_id) => {
   if (!tenant) {
     throw new Error("Tenant not found");
   }
+
+  return tenant;
+};
+
+/*--------------Update Tenant-----------*/
+
+export const updateTenant = async (tenant_id, payload) => {
+  const tenant = await getTenantByIdQuery(tenant_id);
+
+  if (!tenant) {
+    throw new Error("Tenant not found");
+  }
+
+  await updateTenantQuery(tenant_id, payload);
+
+  return await getTenantByIdQuery(tenant_id);
+};
+
+
+
+
+/*--------------Delete Tenant-----------*/
+
+export const deleteTenant = async (tenant_id) => {
+  const tenant = await getTenantByIdQuery(tenant_id);
+
+  if (!tenant) {
+    throw new Error("Tenant not found");
+  }
+
+  await deleteTenantQuery(tenant_id);
 
   return tenant;
 };

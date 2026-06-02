@@ -66,3 +66,49 @@ export const getTenantById = async (req, res) => {
     return errorResponse(res, error.message);
   }
 };
+
+
+
+
+
+/*--------------Update Tenant-----------*/
+
+export const updateTenant = async (req, res) => {
+  try {
+    const { tenant_id } = req.params;
+
+    const data = await tenantsService.updateTenant(
+      tenant_id,
+      req.body
+    );
+
+    return successResponse(
+      res,
+      data,
+      "Tenant updated successfully"
+    );
+  } catch (error) {
+    return errorResponse(res, error.message);
+  }
+};
+
+
+/*--------------Delete Tenant-----------*/
+
+export const deleteTenant = async (req, res) => {
+  try {
+    const { tenant_id } = req.params;
+
+    const data = await tenantsService.deleteTenant(
+      tenant_id
+    );
+
+    return successResponse(
+      res,
+      data,
+      "Tenant deleted successfully"
+    );
+  } catch (error) {
+    return errorResponse(res, error.message);
+  }
+};

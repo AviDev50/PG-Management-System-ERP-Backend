@@ -54,3 +54,54 @@ export const resolveComplaint = async (req, res) => {
     return errorResponse(res, error.message);
   }
 };
+
+
+
+/*-----------------Update Complaints-------------*/
+export const updateComplaint = async (
+  req,
+  res
+) => {
+  try {
+    const data =
+      await complaintsService.updateComplaint(
+        req.params.id,
+        req.body
+      );
+
+    return successResponse(
+      res,
+      data,
+      "Complaint updated successfully"
+    );
+  } catch (error) {
+    return errorResponse(
+      res,
+      error.message
+    );
+  }
+};
+
+/*------------Delete Complaint-----------------*/
+export const deleteComplaint = async (
+  req,
+  res
+) => {
+  try {
+    const data =
+      await complaintsService.deleteComplaint(
+        req.params.id
+      );
+
+    return successResponse(
+      res,
+      data,
+      "Complaint deleted successfully"
+    );
+  } catch (error) {
+    return errorResponse(
+      res,
+      error.message
+    );
+  }
+};
