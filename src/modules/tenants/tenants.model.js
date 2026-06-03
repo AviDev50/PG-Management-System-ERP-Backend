@@ -46,6 +46,8 @@ export const checkBedOccupied = async (bed_id) => {
   return results[0];
 };
 
+
+
 /*--------------Create Tenant-----------*/
 
 export const createTenantQuery = async (data) => {
@@ -63,6 +65,7 @@ export const createTenantQuery = async (data) => {
 
       phone,
       email,
+      password_hash,
 
       gender,
       dob,
@@ -96,7 +99,7 @@ export const createTenantQuery = async (data) => {
       security_deposit,
       emergency_contact
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const [result] = await db.query(query, [
@@ -111,6 +114,7 @@ export const createTenantQuery = async (data) => {
 
     data.phone,
     data.email,
+    data.password_hash, 
 
     data.gender,
     data.dob,
@@ -147,6 +151,10 @@ export const createTenantQuery = async (data) => {
 
   return result;
 };
+
+
+
+
 
 /*--------------Update Bed Status-----------*/
 
@@ -382,4 +390,22 @@ export const deleteTenantQuery = async (tenant_id) => {
   const [result] = await db.query(query, [tenant_id]);
 
   return result;
+};
+
+
+/*--------------Get Tenant By Phone Number-----------*/
+export const getTenantByPhoneQuery = async (phone) => {
+  const query = `
+    SELECT *
+    FROM tenants
+    WHERE phone = ?
+    AND password_hash IS NOT NULL
+    AND deleted_at IS NULL
+    ORDER BY tenant_id DESC
+    LIMIT 1
+  `;
+
+  const [rows] = await db.query(query, [phone]);
+
+  return rows[0];
 };

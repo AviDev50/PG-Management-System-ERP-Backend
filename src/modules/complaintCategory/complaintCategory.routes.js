@@ -1,39 +1,36 @@
 import express from "express";
 
 import {
-  createComplaint,
-  getComplaints,
-  resolveComplaint,
-  updateComplaint,
-  deleteComplaint,
-} from "./complaints.controller.js";
-import { verifyToken } from "../../common/middlewares/auth.middleware.js";
+  createCategory,
+  getCategories,
+  deleteCategory,
+  updateCategory,
+} from "./complaintCategory.controller.js";
 
 const router = express.Router();
 
 /*===========================================================================
-| CREATE COMPLAINT
+| CREATE CATEGORY
 ===========================================================================*/
 
-router.post("/create", verifyToken,createComplaint);
+router.post("/", createCategory);
 
 /*===========================================================================
-| GET COMPLAINTS
+| GET ALL CATEGORIES
 ===========================================================================*/
 
-router.get("/", verifyToken, getComplaints);
+router.get("/", getCategories);
 
 /*===========================================================================
-| RESOLVE COMPLAINT
+| DELETE CATEGORY
 ===========================================================================*/
 
-router.put("/resolve/:id", resolveComplaint);
+router.delete("/:id", deleteCategory);
 
-/*---------update Complaint--------*/
-router.put("/:id", updateComplaint);
+/*===========================================================================
+| UPDATE CATEGORY
+===========================================================================*/
 
-/*---------Delete Complaint--------*/
-
-router.delete("/:id", deleteComplaint);
+router.put("/:id", updateCategory);
 
 export default router;

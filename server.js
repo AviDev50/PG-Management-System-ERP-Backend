@@ -2,7 +2,6 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 
-
 /*------------ ROUTES------------------*/
 
 import authRoutes from "./src/modules/auth/auth.routes.js";
@@ -24,6 +23,8 @@ import managersRoutes from "./src/modules/managers/managers.routes.js";
 import mealPlansRoutes from "./src/modules/meal_plans/mealPlans.routes.js";
 import reportsRoutes from "./src/modules/reports/reports.routes.js";
 import notificationRoutes from "./src/modules/notifications/notifications.routes.js";
+
+import complaintCategoryRoutes from "./src/modules/complaintCategory/complaintCategory.routes.js";
 
 dotenv.config();
 const app = express();
@@ -51,8 +52,8 @@ app.use("/api/user-branches", userBranchesRoutes);
 app.use("/api/managers", managersRoutes);
 app.use("/api/meal-plans", mealPlansRoutes);
 app.use("/api/reports", reportsRoutes);
-app.use("/api/notifications", notificationRoutes);
-
+app.use("/api/notifications", notificationRoutes);  
+app.use("/api/complaint-categories", complaintCategoryRoutes);
 
 const PORT = process.env.PORT || 4000;
 

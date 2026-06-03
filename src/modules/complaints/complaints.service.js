@@ -1,30 +1,19 @@
-// complaints.service.js
-
-import {
-  getTenantById,
-  createComplaintQuery,
-  getComplaintById,
-  getComplaintsQuery,
-  resolveComplaintQuery,
-  updateComplaintQuery,
-  deleteComplaintQuery,
-} from "./complaints.model.js";
+import * as complaintModel from "./complaints.model.js";
 
 /*===========================================================================
-
 | CREATE COMPLAINT
-| Complaint create karta hai
-
 ===========================================================================*/
 
-export const createComplaint = async (payload) => {
-  const { tenant_id, title, description, category } = payload;
+export const createComplaint = async (payload, user) => {
+  const { title, description, category_id } = payload;
+
+  const tenant_id = user.user_id;
 
   /*--------------------------------------------------
   | CHECK TENANT
   --------------------------------------------------*/
 
-  const tenant = await getTenantById(tenant_id);
+  const tenant = await complaintModel.getTenantById(tenant_id);
 
   if (!tenant) {
     throw new Error("Tenant not found");
@@ -38,50 +27,48 @@ export const createComplaint = async (payload) => {
   | CREATE COMPLAINT
   --------------------------------------------------*/
 
-  const result = await createComplaintQuery({
+  const result = await complaintModel.createComplaintQuery({
     tenant_id,
     branch_id: tenant.branch_id,
     room_id: tenant.room_id,
     title,
     description,
-    category,
+    category_id,
   });
 
   /*--------------------------------------------------
   | FETCH CREATED COMPLAINT
   --------------------------------------------------*/
 
-  const complaint = await getComplaintById(result.insertId);
+  const complaint = await complaintModel.getComplaintById(result.insertId);
 
   return complaint;
 };
 
 /*===========================================================================
-
 | GET COMPLAINTS
-| Complaints list laata hai
-
 ===========================================================================*/
 
-export const getComplaints = async () => {
-  return await getComplaintsQuery();
+export const getComplaints = async (user) => {
+  if (user.role === "tenant") {
+    return await complaintModel.getComplaintsByTenantQuery(user.user_id);
+  }
+
+  return await complaintModel.getComplaintsQuery();
 };
 
 /*===========================================================================
-
 | RESOLVE COMPLAINT
-| Complaint resolve karta hai
-
 ===========================================================================*/
 
 export const resolveComplaint = async (complaint_id) => {
-  const complaint = await getComplaintById(complaint_id);
+  const complaint = await complaintModel.getComplaintById(complaint_id);
 
   if (!complaint) {
     throw new Error("Complaint not found");
   }
 
-  const result = await resolveComplaintQuery(complaint_id);
+  const result = await complaintModel.resolveComplaintQuery(complaint_id);
 
   if (result.affectedRows === 0) {
     throw new Error("Complaint not resolved");
@@ -93,48 +80,34 @@ export const resolveComplaint = async (complaint_id) => {
   };
 };
 
+/*===========================================================================
+| UPDATE COMPLAINT
+===========================================================================*/
 
-
-/*-------------Update Complain--------------*/
-
-export const updateComplaint = async (
-  complaint_id,
-  payload
-) => {
-  const complaint = await getComplaintById(
-    complaint_id
-  );
+export const updateComplaint = async (complaint_id, payload) => {
+  const complaint = await complaintModel.getComplaintById(complaint_id);
 
   if (!complaint) {
     throw new Error("Complaint not found");
   }
 
-  await updateComplaintQuery(
-    complaint_id,
-    payload
-  );
+  await complaintModel.updateComplaintQuery(complaint_id, payload);
 
-  return await getComplaintById(
-    complaint_id
-  );
+  return await complaintModel.getComplaintById(complaint_id);
 };
 
+/*===========================================================================
+| DELETE COMPLAINT
+===========================================================================*/
 
-/*-----------Delete Complaint---------------*/
-export const deleteComplaint = async (
-  complaint_id
-) => {
-  const complaint = await getComplaintById(
-    complaint_id
-  );
+export const deleteComplaint = async (complaint_id) => {
+  const complaint = await complaintModel.getComplaintById(complaint_id);
 
   if (!complaint) {
     throw new Error("Complaint not found");
   }
 
-  await deleteComplaintQuery(
-    complaint_id
-  );
+  await complaintModel.deleteComplaintQuery(complaint_id);
 
   return complaint;
 };

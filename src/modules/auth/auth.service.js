@@ -5,22 +5,17 @@ import { findUserByEmail, getBranchesByPropertyId } from "./auth.model.js";
 import generateToken from "../../common/utils/generateToken.js";
 
 export const login = async ({ email, password }) => {
-
-  
   const user = await findUserByEmail(email);
 
   if (!user) {
     throw new Error("Invalid email");
-
-  
   }
 
   const isMatch = await bcrypt.compare(password, user.password_hash);
 
-/*------------plain password-------------*/
+  /*------------plain password-------------*/
 
-// const isMatch = password === user.password_hash;
-
+  // const isMatch = password === user.password_hash;
 
   if (!isMatch) {
     throw new Error("Invalid password");

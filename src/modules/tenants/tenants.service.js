@@ -1,3 +1,5 @@
+import bcrypt from "bcrypt";
+import generateToken from "../../common/utils/generateToken.js";
 import {
   checkBedOccupied,
   createTenantQuery,
@@ -10,6 +12,7 @@ import {
   getTenantsByBranchQuery,
   updateTenantQuery,
   deleteTenantQuery,
+  getTenantByPhoneQuery,
 } from "./tenants.model.js";
 
 /*--------------Create Tenant-----------*/
@@ -29,6 +32,7 @@ export const createTenant = async (payload) => {
 
     phone,
     email,
+    password,
 
     gender,
     dob,
@@ -71,6 +75,8 @@ export const createTenant = async (payload) => {
     throw new Error("Bed already occupied");
   }
 
+  const hashedPassword = await bcrypt.hash(password, 10);
+
   // Create Tenant
 
   const result = await createTenantQuery({
@@ -85,7 +91,7 @@ export const createTenant = async (payload) => {
 
     phone,
     email,
-
+    password_hash: hashedPassword,
     gender,
     dob,
     marital_status,
@@ -227,9 +233,6 @@ export const updateTenant = async (tenant_id, payload) => {
   return await getTenantByIdQuery(tenant_id);
 };
 
-
-
-
 /*--------------Delete Tenant-----------*/
 
 export const deleteTenant = async (tenant_id) => {
@@ -242,4 +245,35 @@ export const deleteTenant = async (tenant_id) => {
   await deleteTenantQuery(tenant_id);
 
   return tenant;
+};
+
+/*--------------Login Tenant--------------*/
+
+export const loginTenant = async (phone, password) => {
+  const tenant = await getTenantByPhoneQuery(phone);
+
+  if (!tenant) {
+    throw new Error("Invalid phone number");
+  }
+
+  const isMatch = await bcrypt.compare(password, tenant.password_hash);
+
+  if (!isMatch) {
+    throw new Error("Invalid password");
+  }
+
+  const token = generateToken({
+    user_id: tenant.tenant_id,
+    role: "tenant",
+    role_id: null,
+    manager_id: null,
+    branch_id: tenant.branch_id,
+  });
+
+  const { password_hash, ...tenantData } = tenant;
+
+  return {
+    token,
+    tenant: tenantData,
+  };
 };

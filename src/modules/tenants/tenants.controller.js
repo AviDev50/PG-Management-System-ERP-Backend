@@ -67,31 +67,19 @@ export const getTenantById = async (req, res) => {
   }
 };
 
-
-
-
-
 /*--------------Update Tenant-----------*/
 
 export const updateTenant = async (req, res) => {
   try {
     const { tenant_id } = req.params;
 
-    const data = await tenantsService.updateTenant(
-      tenant_id,
-      req.body
-    );
+    const data = await tenantsService.updateTenant(tenant_id, req.body);
 
-    return successResponse(
-      res,
-      data,
-      "Tenant updated successfully"
-    );
+    return successResponse(res, data, "Tenant updated successfully");
   } catch (error) {
     return errorResponse(res, error.message);
   }
 };
-
 
 /*--------------Delete Tenant-----------*/
 
@@ -99,15 +87,22 @@ export const deleteTenant = async (req, res) => {
   try {
     const { tenant_id } = req.params;
 
-    const data = await tenantsService.deleteTenant(
-      tenant_id
-    );
+    const data = await tenantsService.deleteTenant(tenant_id);
 
-    return successResponse(
-      res,
-      data,
-      "Tenant deleted successfully"
-    );
+    return successResponse(res, data, "Tenant deleted successfully");
+  } catch (error) {
+    return errorResponse(res, error.message);
+  }
+};
+
+/*---------------Login Tenant----------------*/
+export const loginTenant = async (req, res) => {
+  try {
+    const { phone, password } = req.body;
+
+    const data = await tenantsService.loginTenant(phone, password);
+
+    return successResponse(res, data, "Login successful");
   } catch (error) {
     return errorResponse(res, error.message);
   }

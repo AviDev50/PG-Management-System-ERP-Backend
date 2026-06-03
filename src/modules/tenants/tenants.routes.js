@@ -8,6 +8,7 @@ import {
   getTenantById,
   updateTenant,
   deleteTenant,
+  loginTenant,
 } from "./tenants.controller.js";
 
 const router = express.Router();
@@ -38,5 +39,8 @@ router.put("/:tenant_id", updateTenant);
 /*--------------Delete Tenant-----------*/
 
 router.delete("/:tenant_id", deleteTenant);
+
+/*-------Tenant Login-------*/
+router.post("/login", loginTenant);
 
 export default router;

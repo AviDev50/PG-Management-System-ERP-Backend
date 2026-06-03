@@ -1,19 +1,14 @@
-// complaints.controller.js
-
 import * as complaintsService from "./complaints.service.js";
 
 import { successResponse, errorResponse } from "../../common/utils/response.js";
 
 /*===========================================================================
-
 | CREATE COMPLAINT
-| New complaint create karta hai
-
 ===========================================================================*/
 
 export const createComplaint = async (req, res) => {
   try {
-    const data = await complaintsService.createComplaint(req.body);
+    const data = await complaintsService.createComplaint(req.body, req.user);
 
     return successResponse(res, data, "Complaint created successfully");
   } catch (error) {
@@ -24,13 +19,12 @@ export const createComplaint = async (req, res) => {
 /*===========================================================================
 
 | GET COMPLAINTS
-| Saari complaints fetch karta hai
 
 ===========================================================================*/
 
 export const getComplaints = async (req, res) => {
   try {
-    const data = await complaintsService.getComplaints();
+    const data = await complaintsService.getComplaints(req.user);
 
     return successResponse(res, data, "Complaints fetched successfully");
   } catch (error) {
@@ -41,7 +35,6 @@ export const getComplaints = async (req, res) => {
 /*===========================================================================
 
 | RESOLVE COMPLAINT
-| Complaint status ko resolved karta hai
 
 ===========================================================================*/
 
@@ -55,53 +48,37 @@ export const resolveComplaint = async (req, res) => {
   }
 };
 
+/*===========================================================================
 
+| UPDATE COMPLAINT
 
-/*-----------------Update Complaints-------------*/
-export const updateComplaint = async (
-  req,
-  res
-) => {
+===========================================================================*/
+
+export const updateComplaint = async (req, res) => {
   try {
-    const data =
-      await complaintsService.updateComplaint(
-        req.params.id,
-        req.body
-      );
+    const data = await complaintsService.updateComplaint(
+      req.params.id,
+      req.body,
+    );
 
-    return successResponse(
-      res,
-      data,
-      "Complaint updated successfully"
-    );
+    return successResponse(res, data, "Complaint updated successfully");
   } catch (error) {
-    return errorResponse(
-      res,
-      error.message
-    );
+    return errorResponse(res, error.message);
   }
 };
 
-/*------------Delete Complaint-----------------*/
-export const deleteComplaint = async (
-  req,
-  res
-) => {
-  try {
-    const data =
-      await complaintsService.deleteComplaint(
-        req.params.id
-      );
+/*===========================================================================
 
-    return successResponse(
-      res,
-      data,
-      "Complaint deleted successfully"
-    );
+| DELETE COMPLAINT
+
+===========================================================================*/
+
+export const deleteComplaint = async (req, res) => {
+  try {
+    const data = await complaintsService.deleteComplaint(req.params.id);
+
+    return successResponse(res, data, "Complaint deleted successfully");
   } catch (error) {
-    return errorResponse(
-      res,
-      error.message
-    );
+    return errorResponse(res, error.message);
   }
 };
