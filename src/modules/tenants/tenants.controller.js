@@ -1,12 +1,34 @@
 import * as tenantsService from "./tenants.service.js";
 
 import { successResponse, errorResponse } from "../../common/utils/response.js";
+import cloudinary from "../../common/config/cloudinary.js";
 
 /*--------------Create Tenant-----------*/
 
 export const createTenant = async (req, res) => {
-  // console.log("REQ BODY =", req.body);
   try {
+    if (req.files?.profile_image?.[0]) {
+      const profileUpload = await cloudinary.uploader.upload(
+        req.files.profile_image[0].path,
+        {
+          folder: "pg_erp/profile",
+        },
+      );
+
+      req.body.profile_image = profileUpload.secure_url;
+    }
+
+    if (req.files?.document_image?.[0]) {
+      const documentUpload = await cloudinary.uploader.upload(
+        req.files.document_image[0].path,
+        {
+          folder: "pg_erp/documents",
+        },
+      );
+
+      req.body.document_image = documentUpload.secure_url;
+    }
+
     const data = await tenantsService.createTenant(req.body);
 
     return successResponse(res, data, "Tenant created successfully");
@@ -69,17 +91,49 @@ export const getTenantById = async (req, res) => {
 
 /*--------------Update Tenant-----------*/
 
+
 export const updateTenant = async (req, res) => {
   try {
     const { tenant_id } = req.params;
 
-    const data = await tenantsService.updateTenant(tenant_id, req.body);
+    if (req.files?.profile_image?.[0]) {
+      const profileUpload = await cloudinary.uploader.upload(
+        req.files.profile_image[0].path,
+        {
+          folder: "pg_erp/profile",
+        }
+      );
 
-    return successResponse(res, data, "Tenant updated successfully");
+      req.body.profile_image = profileUpload.secure_url;
+    }
+
+    if (req.files?.document_image?.[0]) {
+      const documentUpload = await cloudinary.uploader.upload(
+        req.files.document_image[0].path,
+        {
+          folder: "pg_erp/documents",
+        }
+      );
+
+      req.body.document_image = documentUpload.secure_url;
+    }
+
+    const data = await tenantsService.updateTenant(
+      tenant_id,
+      req.body
+    );
+
+    return successResponse(
+      res,
+      data,
+      "Tenant updated successfully"
+    );
   } catch (error) {
+    console.log(error);
     return errorResponse(res, error.message);
   }
 };
+
 
 /*--------------Delete Tenant-----------*/
 

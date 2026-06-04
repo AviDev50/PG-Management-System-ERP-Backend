@@ -228,7 +228,12 @@ export const updateTenant = async (tenant_id, payload) => {
     throw new Error("Tenant not found");
   }
 
-  await updateTenantQuery(tenant_id, payload);
+  const updatedData = {
+    ...tenant,
+    ...payload,
+  };
+
+  await updateTenantQuery(tenant_id, updatedData);
 
   return await getTenantByIdQuery(tenant_id);
 };

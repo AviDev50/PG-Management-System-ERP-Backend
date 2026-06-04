@@ -4,7 +4,7 @@ import {
   createMealPlan,
   getMealPlans,
   getSingleMealPlan,
-  getTodayMealPlan,
+  getMealPlansByBranch,
   updateMealPlan,
   deleteMealPlan,
 } from "./mealPlans.controller.js";
@@ -14,22 +14,38 @@ import { allowRoles } from "../../common/middlewares/role.middleware.js";
 
 const router = express.Router();
 
-/*---------------- Create Meal Plan ----------------*/
+/*-----------Create Meal----------*/
+
 router.post("/create", verifyToken, allowRoles("admin"), createMealPlan);
 
-/*---------------- Get Meal Plans ----------------*/
+/*-----------Get All Meal----------*/
+
 router.get("/", getMealPlans);
 
-/*---------------- Get Today's Meal Plan(mean ye branch id ke current date ka meal return krega ) ----------------*/
-router.get("/today/:branch_id",getTodayMealPlan,);
+/*-----------Get Meal By Branch Id ----------*/
 
-/*---------------- Get Single Meal Plan ----------------*/
+router.get("/branch/:branch_id", getMealPlansByBranch);
+
+/*-----------Get Single Meal ----------*/
+
 router.get("/:id", getSingleMealPlan);
 
-/*---------------- Update Meal Plan ----------------*/
-router.put("/update/:id", verifyToken, allowRoles("admin"), updateMealPlan);
+/*-----------Update Meal----------*/
 
-/*---------------- Delete Meal Plan ----------------*/
-router.delete("/delete/:id", verifyToken, allowRoles("admin"), deleteMealPlan);
+router.put(
+  "/update/:meal_plan_id",
+  verifyToken,
+  allowRoles("admin"),
+  updateMealPlan,
+);
+
+/*-----------Delete Meal----------*/
+
+router.delete(
+  "/delete/:meal_plan_id",
+  verifyToken,
+  allowRoles("admin"),
+  deleteMealPlan,
+);
 
 export default router;

@@ -1,4 +1,5 @@
 import express from "express";
+import upload from "../../common/config/upload.js";
 
 import {
   createTenant,
@@ -11,11 +12,21 @@ import {
   loginTenant,
 } from "./tenants.controller.js";
 
+import { verifyToken } from "../../common/middlewares/auth.middleware.js";
+import { allowRoles } from "../../common/middlewares/role.middleware.js";
+
 const router = express.Router();
 
 /*--------------Create Tenant-----------*/
 
-router.post("/create", createTenant);
+router.post(
+  "/create",
+  upload.fields([
+    { name: "profile_image", maxCount: 1 },
+    { name: "document_image", maxCount: 2 },
+  ]),
+  createTenant,
+);
 
 /*--------------Get Tenants-----------*/
 
@@ -34,7 +45,14 @@ router.get("/:tenant_id", getTenantById);
 
 /*--------------Update Tenant-----------*/
 
-router.put("/:tenant_id", updateTenant);
+router.put(
+  "/:tenant_id",
+  upload.fields([
+    { name: "profile_image", maxCount: 1 },
+    { name: "document_image", maxCount: 1 },
+  ]),
+  updateTenant,
+);
 
 /*--------------Delete Tenant-----------*/
 
