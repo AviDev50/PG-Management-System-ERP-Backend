@@ -42,6 +42,7 @@ export const checkPropertyOwnership = async (property_id, user_id) => {
 /*--------------Create Branch-----------*/
 
 export const createBranchQuery = async (data) => {
+  // console.log("DB DATA =>", data);
   const query = `
     INSERT INTO branches
     (
@@ -299,4 +300,23 @@ ORDER BY b.branch_id DESC
     amenities: parseArrayField(branch.amenities),
     branch_photos: parseArrayField(branch.branch_photos),
   }));
+};
+
+/*--------------Approve Branch-----------*/
+
+export const approveBranchQuery = async (branch_id, approved_by) => {
+  const query = `
+    UPDATE branches
+    SET
+      approval_status = 'approved',
+      approved_by = ?,
+      approved_at = NOW(),
+      rejection_reason = NULL
+
+    WHERE branch_id = ?
+  `;
+
+  const [result] = await db.query(query, [approved_by, branch_id]);
+
+  return result;
 };

@@ -93,19 +93,13 @@ const getMealPlans = async () => {
 const getSingleMealPlan = async (meal_plan_id) => {
   const [plans] = await db.query(
     `
-   SELECT
-  meal_day_id,
-  day_name,
-  breakfast_menu,
-  lunch_menu,
-  snack_menu,
-  dinner_menu
-
-FROM meal_plan_days
-
-WHERE meal_plan_id = ?
-    LIMIT 1
-    `,
+  SELECT
+    meal_plan_id,
+    name,
+    DATE_FORMAT(effective_date, '%Y-%m-%d') AS effective_date
+  FROM meal_plans
+  WHERE meal_plan_id = ?
+  `,
     [meal_plan_id],
   );
 
@@ -115,34 +109,33 @@ WHERE meal_plan_id = ?
 
   const [days] = await db.query(
     `
-  SELECT
-    meal_day_id,
-    day_name,
-    breakfast_menu,
-    lunch_menu,
-    snack_menu,
-    dinner_menu
-
-  FROM meal_plan_days
-
-  WHERE meal_plan_id = ?
-
-  ORDER BY FIELD(
-    day_name,
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday'
-  )
-  `,
+    SELECT
+      meal_day_id,
+      day_name,
+      breakfast_menu,
+      lunch_menu,
+      snack_menu,
+      dinner_menu
+    FROM meal_plan_days
+    WHERE meal_plan_id = ?
+    ORDER BY FIELD(
+      day_name,
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    )
+    `,
     [meal_plan_id],
   );
 
   return {
-    ...plans[0],
+    meal_plan_id: plans[0].meal_plan_id,
+    name: plans[0].name,
+    effective_date: plans[0].effective_date,
     days,
   };
 };
@@ -151,26 +144,26 @@ WHERE meal_plan_id = ?
 const getMealPlansByBranch = async (branch_id) => {
   const [plans] = await db.query(
     `
-    SELECT
-      mp.meal_plan_id,
-      mp.branch_id,
-      b.name AS branch_name,
-      mp.name,
-      mp.effective_date,
-      mp.is_active,
-      mp.created_at,
-      mp.updated_at
+  SELECT
+    mp.meal_plan_id,
+    mp.branch_id,
+    b.name AS branch_name,
+    mp.name,
+    DATE_FORMAT(mp.effective_date, '%Y-%m-%d') AS effective_date,
+    mp.is_active,
+    mp.created_at,
+    mp.updated_at
 
-    FROM meal_plans mp
+  FROM meal_plans mp
 
-    JOIN branches b
-      ON b.branch_id = mp.branch_id
+  JOIN branches b
+    ON b.branch_id = mp.branch_id
 
-    WHERE mp.branch_id = ?
-      AND mp.deleted_at IS NULL
+  WHERE mp.branch_id = ?
+    AND mp.deleted_at IS NULL
 
-    ORDER BY mp.effective_date DESC
-    `,
+  ORDER BY mp.effective_date DESC
+  `,
     [branch_id],
   );
 

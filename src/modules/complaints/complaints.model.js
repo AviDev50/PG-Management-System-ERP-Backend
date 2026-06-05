@@ -283,3 +283,62 @@ export const deleteComplaintQuery = async (complaint_id) => {
 
   return result;
 };
+
+
+
+/*===========================================================================
+| GET COMPLAINT  BY BRANCH
+===========================================================================*/
+
+export const getComplaintsByBranchQuery = async (
+  branch_id
+) => {
+  const query = `
+    SELECT
+      c.complaint_id,
+      c.title,
+      c.description,
+      c.status,
+      c.created_at,
+
+      t.tenant_id,
+      CONCAT(
+        t.first_name,
+        ' ',
+        t.last_name
+      ) AS tenant_name,
+
+      r.room_id,
+      r.name AS room_name,
+
+      cc.category_name,
+
+      b.branch_id,
+      b.name AS branch_name
+
+    FROM complaints c
+
+    LEFT JOIN tenants t
+      ON t.tenant_id = c.tenant_id
+
+    LEFT JOIN rooms r
+      ON r.room_id = c.room_id
+
+    LEFT JOIN complaint_categories cc
+      ON cc.category_id = c.category_id
+
+    LEFT JOIN branches b
+      ON b.branch_id = c.branch_id
+
+    WHERE c.branch_id = ?
+      AND c.deleted_at IS NULL
+
+    ORDER BY c.complaint_id DESC
+  `;
+
+  const [rows] = await db.query(query, [
+    branch_id,
+  ]);
+
+  return rows;
+};

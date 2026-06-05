@@ -6,6 +6,7 @@ import {
   resolveComplaint,
   updateComplaint,
   deleteComplaint,
+  getComplaintCountByBranch,
 } from "./complaints.controller.js";
 import { verifyToken } from "../../common/middlewares/auth.middleware.js";
 
@@ -30,10 +31,20 @@ router.get("/", verifyToken, getComplaints);
 router.put("/resolve/:id", resolveComplaint);
 
 /*---------update Complaint--------*/
+
 router.put("/:id", updateComplaint);
 
 /*---------Delete Complaint--------*/
 
 router.delete("/:id", deleteComplaint);
+
+
+/*---------get complaint by branch id---------*/
+
+router.get(
+  "/branch/:branch_id",
+  verifyToken,
+  getComplaintCountByBranch
+);
 
 export default router;

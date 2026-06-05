@@ -7,9 +7,25 @@ import generateToken from "../../common/utils/generateToken.js";
 export const login = async ({ email, password }) => {
   const user = await findUserByEmail(email);
 
-  if (!user) {
-    throw new Error("Invalid email");
-  }
+if (!email) {
+  const error = new Error("Email is required");
+  error.statusCode = 400;
+  throw error;
+}
+
+if (!password) {
+  const error = new Error("Password is required");
+  error.statusCode = 400;
+  throw error;
+}
+
+if (!user) {
+  const error = new Error("Wrong email");
+  error.statusCode = 401;
+  throw error;
+}
+
+
 
   const isMatch = await bcrypt.compare(password, user.password_hash);
 
@@ -17,9 +33,11 @@ export const login = async ({ email, password }) => {
 
   // const isMatch = password === user.password_hash;
 
-  if (!isMatch) {
-    throw new Error("Invalid password");
-  }
+ if (!isMatch) {
+  const error = new Error("Wrong password");
+  error.statusCode = 401;
+  throw error;
+}
 
   const token = generateToken(user);
 

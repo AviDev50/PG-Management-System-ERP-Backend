@@ -33,6 +33,8 @@ export const findUserByEmail = async (email) => {
   return results[0];
 };
 
+
+
 export const getBranchesByPropertyId = async (property_id) => {
   const query = `
     SELECT

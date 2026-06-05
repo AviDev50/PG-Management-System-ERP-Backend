@@ -111,3 +111,9 @@ export const deleteComplaint = async (complaint_id) => {
 
   return complaint;
 };
+
+/*-------------Get complaint by branch id-----------*/
+
+export const getComplaintsByBranchService = async (branch_id) => {
+  return await complaintModel.getComplaintsByBranchQuery(branch_id);
+};

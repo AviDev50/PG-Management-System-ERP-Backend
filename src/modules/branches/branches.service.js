@@ -6,11 +6,20 @@ import {
   updateBranchQuery,
   deleteBranchQuery,
   getBranchesByPropertyIdQuery,
+  approveBranchQuery,
 } from "./branches.model.js";
 
 /*------------Create Branch-------------*/
 
 export const createBranch = async (payload) => {
+  if (typeof payload.ideal_for === "string") {
+    payload.ideal_for = JSON.parse(payload.ideal_for);
+  }
+
+  if (typeof payload.amenities === "string") {
+    payload.amenities = JSON.parse(payload.amenities);
+  }
+
   const branchId = await createBranchQuery(payload);
 
   const branch = await getBranchByIdQuery(branchId);
@@ -52,6 +61,14 @@ export const getSingleBranch = async (branch_id) => {
 /*--------------Update Branch-----------*/
 
 export const updateBranch = async (branch_id, payload) => {
+  if (typeof payload.ideal_for === "string") {
+    payload.ideal_for = JSON.parse(payload.ideal_for);
+  }
+
+  if (typeof payload.amenities === "string") {
+    payload.amenities = JSON.parse(payload.amenities);
+  }
+
   const branch = await getBranchByIdQuery(branch_id);
 
   if (!branch) {
@@ -94,4 +111,18 @@ export const getBranchesByPropertyId = async (property_id) => {
     active,
     pending,
   };
+};
+
+/*--------------Approve Branch-----------*/
+
+export const approveBranch = async (branch_id, user) => {
+  const branch = await getBranchByIdQuery(branch_id);
+
+  if (!branch) {
+    throw new Error("Branch not found");
+  }
+
+  await approveBranchQuery(branch_id, user.user_id);
+
+  return await getBranchByIdQuery(branch_id);
 };

@@ -97,9 +97,7 @@ export const updateMealPlan = async (req, res) => {
 /*----------Delete Meal Plan-----------*/
 export const deleteMealPlan = async (req, res) => {
   try {
-    await mealPlanService.deleteMealPlan(
-      req.params.meal_plan_id,
-    );
+    await mealPlanService.deleteMealPlan(req.params.meal_plan_id);
 
     return res.status(200).json({
       success: true,

@@ -82,3 +82,25 @@ export const deleteComplaint = async (req, res) => {
     return errorResponse(res, error.message);
   }
 };
+
+/*----------Get complaint by branch----------*/
+
+export const getComplaintCountByBranch = async (req, res) => {
+  try {
+    const { branch_id } = req.params;
+
+    const complaints =
+      await complaintsService.getComplaintsByBranchService(branch_id);
+
+    return successResponse(
+      res,
+      {
+        total_complaints: complaints.length,
+        complaints,
+      },
+      "Complaints fetched successfully",
+    );
+  } catch (error) {
+    return errorResponse(res, error.message);
+  }
+};

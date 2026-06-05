@@ -8,6 +8,6 @@ export const login = async (req, res) => {
 
     return successResponse(res, data, "Login successful");
   } catch (error) {
-    return errorResponse(res, error.message);
+    return errorResponse(res, error.message, error.statusCode || 500);
   }
 };
