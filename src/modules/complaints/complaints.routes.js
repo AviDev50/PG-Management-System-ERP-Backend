@@ -16,7 +16,7 @@ const router = express.Router();
 | CREATE COMPLAINT
 ===========================================================================*/
 
-router.post("/create", verifyToken,createComplaint);
+router.post("/create", verifyToken, createComplaint);
 
 /*===========================================================================
 | GET COMPLAINTS
@@ -38,13 +38,8 @@ router.put("/:id", updateComplaint);
 
 router.delete("/:id", deleteComplaint);
 
-
 /*---------get complaint by branch id---------*/
 
-router.get(
-  "/branch/:branch_id",
-  verifyToken,
-  getComplaintCountByBranch
-);
+router.get("/branch/:branch_id", verifyToken, getComplaintCountByBranch);
 
 export default router;

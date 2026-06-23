@@ -1,8 +1,8 @@
-import express from "express";
 import dotenv from "dotenv";
-import cors from "cors";
+dotenv.config();
 
-/*------------ ROUTES------------------*/
+import express from "express";
+import cors from "cors";
 
 import authRoutes from "./src/modules/auth/auth.routes.js";
 import adminRoutes from "./src/modules/admin/admin.routes.js";
@@ -23,17 +23,18 @@ import managersRoutes from "./src/modules/managers/managers.routes.js";
 import mealPlansRoutes from "./src/modules/meal_plans/mealPlans.routes.js";
 import reportsRoutes from "./src/modules/reports/reports.routes.js";
 import notificationRoutes from "./src/modules/notifications/notifications.routes.js";
-
 import complaintCategoryRoutes from "./src/modules/complaintCategory/complaintCategory.routes.js";
 
-dotenv.config();
 const app = express();
 
-/*-----------Middlware--------------*/
-app.use(cors());
+/*----------- Middleware --------------*/
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGIN,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+}));
 app.use(express.json());
 
-/*------------ ROUTES------------------*/
+/*------------ Routes ------------------*/
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/pg", pgRoutes);
@@ -52,11 +53,27 @@ app.use("/api/user-branches", userBranchesRoutes);
 app.use("/api/managers", managersRoutes);
 app.use("/api/meal-plans", mealPlansRoutes);
 app.use("/api/reports", reportsRoutes);
-app.use("/api/notifications", notificationRoutes);  
+app.use("/api/notifications", notificationRoutes);
 app.use("/api/complaint-categories", complaintCategoryRoutes);
 
-const PORT = process.env.PORT || 4000;
+/*------------ 404 Handler ------------------*/
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+  });
+});
 
+/*------------ Global Error Handler ------------------*/
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.statusCode || 500).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+  });
+});
+
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

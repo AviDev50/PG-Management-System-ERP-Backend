@@ -1,49 +1,26 @@
-import bcrypt from "bcrypt";
-
+import bcrypts from "bcryptjs";
 import { findUserByEmail, getBranchesByPropertyId } from "./auth.model.js";
-
 import generateToken from "../../common/utils/generateToken.js";
 
-export const login = async ({ email, password }) => {
+export async function login({ email, password }) {
   const user = await findUserByEmail(email);
 
-if (!email) {
-  const error = new Error("Email is required");
-  error.statusCode = 400;
-  throw error;
-}
-
-if (!password) {
-  const error = new Error("Password is required");
-  error.statusCode = 400;
-  throw error;
-}
-
-if (!user) {
-  const error = new Error("Wrong email");
-  error.statusCode = 401;
-  throw error;
-}
-
-
+  if (!user) {
+    const error = new Error("Wrong email");
+    error.statusCode = 401;
+    throw error;
+  }
 
   const isMatch = await bcrypt.compare(password, user.password_hash);
-
-  /*------------plain password-------------*/
-
-  // const isMatch = password === user.password_hash;
-
- if (!isMatch) {
-  const error = new Error("Wrong password");
-  error.statusCode = 401;
-  throw error;
-}
+  if (!isMatch) {
+    const error = new Error("Wrong password");
+    error.statusCode = 401;
+    throw error;
+  }
 
   const token = generateToken(user);
 
   let branches = [];
-
-  // sirf admin/property owner ke liye branches lao
   if (user.property_id) {
     branches = await getBranchesByPropertyId(user.property_id);
   }
@@ -64,4 +41,4 @@ if (!user) {
       branches,
     },
   };
-};
+}

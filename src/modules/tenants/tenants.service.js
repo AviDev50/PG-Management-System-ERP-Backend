@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcryptjs from "bcryptjs";
 import generateToken from "../../common/utils/generateToken.js";
 import {
   checkBedOccupied,

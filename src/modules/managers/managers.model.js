@@ -1,5 +1,5 @@
 import db from "../../common/config/db.js";
-import bcrypt from "bcrypt";
+import bcryptjs from "bcryptjs";
 
 /*---------------- Create Manager ----------------*/
 
