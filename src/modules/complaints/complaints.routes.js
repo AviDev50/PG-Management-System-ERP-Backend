@@ -10,7 +10,7 @@ import {
 } from "./complaints.controller.js";
 import { verifyToken } from "../../common/middlewares/auth.middleware.js";
 
-const router = express.Router();
+const router = express.Router();;;;;;;
 
 /*===========================================================================
 | CREATE COMPLAINT
