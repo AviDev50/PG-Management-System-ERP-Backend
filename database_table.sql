@@ -385,3 +385,5 @@ CREATE TABLE expenses (
         FOREIGN KEY (expense_category_id)
         REFERENCES expense_categories (expense_category_id)
 );
+
+

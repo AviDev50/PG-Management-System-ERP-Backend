@@ -154,13 +154,18 @@ export const deleteRoom = async (room_id) => {
     throw new Error("Room not found");
   }
 
+  if (room.occupied_beds > 0) {
+    throw new Error(
+      "Cannot delete room: this room has occupied beds. Please vacate or transfer tenants first."
+    );
+  }
+
   await deleteRoomQuery(room_id);
 
   return {
     room_id,
   };
 };
-
 /*----------get data behalf of branch id-----*/
 export const getRoomsByBranch = async (branch_id) => {
   return await getRoomsByBranchQuery(branch_id);
