@@ -199,11 +199,9 @@ export const updateRoomQuery = async (data, room_id) => {
 };
 
 /*------------------Delete Room-------------*/
-
 export const deleteRoomQuery = async (room_id) => {
   const query = `
-    UPDATE rooms
-    SET deleted_at = NOW()
+    DELETE FROM rooms
     WHERE room_id = ?
   `;
 
