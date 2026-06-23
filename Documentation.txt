@@ -1,0 +1,48 @@
+-ROLES - super_admin, admin, branch_manager
+In app - only admin and branch_manager is present 
+In website - only admin and branch_manager is present 
+super_admin - super_admin manages all from api rfrom postman. 
+-Hard delete implemented in this complete saas except below tables 
+
+
+
+-- =====================================================================
+-- NOT CHANGED (intentionally kept as RESTRICT / no action):
+--
+-- 1. fk_users_role (roles -> users)
+--    Reason: Agar koi role accidentally delete ho jaye, to uske saare
+--    users CASCADE se delete ho jayenge (e.g. super_admin role delete
+--    = sare admins gayab). Yeh bahut risky hai, isliye RESTRICT better.
+--
+-- 2. fk_tt_old_room, fk_tt_old_bed, fk_tt_new_room, fk_tt_new_bed
+--    (rooms/beds -> tenant_transfers)
+--    Reason: Yeh history/log records hain. Room/bed delete hone par
+--    transfer history delete na ho, warna purane records ka context
+--    chala jayega. Discuss kar lena agar yeh bhi CASCADE chahiye.
+--
+-- 3. fk_payment_collected_by, fk_tt_transferred
+--    (users -> payments.collected_by, users -> tenant_transfers.transferred_by)
+--    Reason: Yeh "who did this action" reference hai. User delete hone
+--    par payment/transfer record delete nahi hona chahiye - sirf
+--    reference null ho sakta hai (already DEFAULT NULL hai column mein,
+--    par FK abhi RESTRICT hai - chaho to SET NULL kar sakte hain).
+--
+-- 4. fk_branches_manager, fk_branches_approved_by (users -> branches)
+--    Already SET NULL hai - theek hai, change nahi kiya.
+--
+-- Agar in sabko bhi CASCADE/SET NULL karna ho, batao - update kar dunga.
+-- =====================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
