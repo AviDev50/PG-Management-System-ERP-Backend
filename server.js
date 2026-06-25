@@ -24,6 +24,7 @@ import mealPlansRoutes from "./src/modules/meal_plans/mealPlans.routes.js";
 import reportsRoutes from "./src/modules/reports/reports.routes.js";
 import notificationRoutes from "./src/modules/notifications/notifications.routes.js";
 import complaintCategoryRoutes from "./src/modules/complaintCategory/complaintCategory.routes.js";
+import tenantAuthRoutes from "./src/modules/tenant-auth/tenantAuth.route.js";
 
 const app = express();
 
@@ -55,6 +56,8 @@ app.use("/api/meal-plans", mealPlansRoutes);
 app.use("/api/reports", reportsRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/complaint-categories", complaintCategoryRoutes);
+app.use("/api/auth", authRoutes);           // staff login
+app.use("/api/tenant-auth", tenantAuthRoutes); // tenant login
 
 /*------------ 404 Handler ------------------*/
 app.use((req, res) => {

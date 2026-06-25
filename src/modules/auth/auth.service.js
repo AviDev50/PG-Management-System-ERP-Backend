@@ -1,5 +1,5 @@
-import bcrypts from "bcryptjs";
-import { findUserByEmail, getBranchesByPropertyId } from "./auth.model.js";
+import bcrypt from "bcryptjs";
+import { findUserByEmail, getBranchesByUserId } from "./auth.model.js";
 import generateToken from "../../common/utils/generateToken.js";
 
 export async function login({ email, password }) {
@@ -21,8 +21,8 @@ export async function login({ email, password }) {
   const token = generateToken(user);
 
   let branches = [];
-  if (user.property_id) {
-    branches = await getBranchesByPropertyId(user.property_id);
+  if (user.role === "admin") {
+    branches = await getBranchesByUserId(user.user_id);
   }
 
   delete user.password_hash;
@@ -35,7 +35,6 @@ export async function login({ email, password }) {
       email: user.email,
       role_id: user.role_id,
       role: user.role,
-      property_id: user.property_id,
       manager_id: user.manager_id || null,
       branch_id: user.branch_id || null,
       branches,

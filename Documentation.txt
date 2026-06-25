@@ -35,11 +35,19 @@ super_admin - super_admin manages all from api rfrom postman.
 
 
 
+Iska sahi naam hai — "Static Role-Based Authorization" ya simply "Role Check" — RBAC nahi, kyunki:
+
+Roles fixed hain (3 hi roles hain, naya role add karna ho to code change karna padega)
+Permissions database mein dynamically configure nahi hoti — wo code mein baked hain
+Koi role_permissions mapping table nahi hai
 
 
 
-
-
+Final state — sab kuch ek hi authoritative system pe consolidated
+users (role_id → roles)
+  ├── super_admin  → checkBranchAccess mein full bypass
+  ├── admin        → user_branches table se multiple branches verify
+  └── branch_manager → managers table se single branch verify (+ is_active check)
 
 
 

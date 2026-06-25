@@ -9,7 +9,6 @@ export const findUserByEmail = async (email) => {
       users.password_hash,
       users.role_id,
       roles.name AS role,
-      properties.property_id,
       m.manager_id,
       m.branch_id
 
@@ -17,9 +16,6 @@ export const findUserByEmail = async (email) => {
 
     JOIN roles
       ON roles.role_id = users.role_id
-
-    LEFT JOIN properties
-      ON properties.user_id = users.user_id
 
     LEFT JOIN managers m
       ON m.user_id = users.user_id
@@ -33,18 +29,15 @@ export const findUserByEmail = async (email) => {
   return results[0];
 };
 
-
-
-export const getBranchesByPropertyId = async (property_id) => {
+export const getBranchesByUserId = async (user_id) => {
   const query = `
-    SELECT
-      branch_id,
-      name
-    FROM branches
-    WHERE property_id = ?
+    SELECT b.branch_id, b.name
+    FROM branches b
+    JOIN user_branches ub ON ub.branch_id = b.branch_id
+    WHERE ub.user_id = ?
   `;
 
-  const [results] = await db.query(query, [property_id]);
+  const [results] = await db.query(query, [user_id]);
 
   return results;
 };

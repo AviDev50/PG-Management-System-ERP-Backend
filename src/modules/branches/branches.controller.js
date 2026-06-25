@@ -4,10 +4,38 @@ import { successResponse, errorResponse } from "../../common/utils/response.js";
 import cloudinary from "../../common/config/cloudinary.js";
 
 /*--------------Create Branch-----------*/
+// export const createBranch = async (req, res) => {
+//   try {
+//     // console.log("BODY =>", req.body);
+
+//     let photoUrls = [];
+
+//     if (req.files && req.files.length > 0) {
+//       photoUrls = await Promise.all(
+//         req.files.map(async (file) => {
+//           const uploadResult = await cloudinary.uploader.upload(file.path, {
+//             folder: "pg_erp/branches",
+//           });
+
+//           return uploadResult.secure_url;
+//         }),
+//       );
+//     }
+
+//     req.body.branch_photos = photoUrls;
+
+//     const data = await branchesService.createBranch(req.body);
+
+//     return successResponse(res, data, "Branch created successfully");
+//   } catch (error) {
+//     console.log(error);
+//     return errorResponse(res, error.message);
+//   }
+// };
+
+//for new flow
 export const createBranch = async (req, res) => {
   try {
-    // console.log("BODY =>", req.body);
-
     let photoUrls = [];
 
     if (req.files && req.files.length > 0) {
@@ -16,7 +44,6 @@ export const createBranch = async (req, res) => {
           const uploadResult = await cloudinary.uploader.upload(file.path, {
             folder: "pg_erp/branches",
           });
-
           return uploadResult.secure_url;
         }),
       );
@@ -24,7 +51,7 @@ export const createBranch = async (req, res) => {
 
     req.body.branch_photos = photoUrls;
 
-    const data = await branchesService.createBranch(req.body);
+    const data = await branchesService.createBranch(req.body, req.user.user_id);
 
     return successResponse(res, data, "Branch created successfully");
   } catch (error) {

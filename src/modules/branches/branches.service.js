@@ -8,10 +8,30 @@ import {
   getBranchesByPropertyIdQuery,
   approveBranchQuery,
 } from "./branches.model.js";
+import { getSinglePropertyQuery } from "../pg/pg.model.js";
 
 /*------------Create Branch-------------*/
 
-export const createBranch = async (payload) => {
+// export const createBranch = async (payload) => {
+//   if (typeof payload.ideal_for === "string") {
+//     payload.ideal_for = JSON.parse(payload.ideal_for);
+//   }
+
+//   if (typeof payload.amenities === "string") {
+//     payload.amenities = JSON.parse(payload.amenities);
+//   }
+
+//   const branchId = await createBranchQuery(payload);
+
+//   const branch = await getBranchByIdQuery(branchId);
+
+//   return branch;
+// };
+
+//for new flow
+ // exact path apne project ke hisaab se confirm kar lena
+
+export const createBranch = async (payload, requestingUserId) => {
   if (typeof payload.ideal_for === "string") {
     payload.ideal_for = JSON.parse(payload.ideal_for);
   }
@@ -20,11 +40,34 @@ export const createBranch = async (payload) => {
     payload.amenities = JSON.parse(payload.amenities);
   }
 
+  // Ownership verify — ye property requesting admin ki hi hai ya nahi
+  const property = await getSinglePropertyQuery(payload.property_id);
+
+  if (!property) {
+    throw new Error("Property not found");
+  }
+
+  if (Number(property.user_id) !== Number(requestingUserId)) {
+  throw new Error("You are not authorized to create a branch under this property");
+}
+
   const branchId = await createBranchQuery(payload);
+
+  // user_branches entry — admin ko is naye branch ka access mil gaya
+  await addUserBranchQuery(requestingUserId, branchId);
 
   const branch = await getBranchByIdQuery(branchId);
 
   return branch;
+};
+
+export const addUserBranchQuery = async (userId, branchId) => {
+  const query = `
+    INSERT INTO user_branches (user_id, branch_id)
+    VALUES (?, ?)
+  `;
+  const [result] = await db.query(query, [userId, branchId]);
+  return result.insertId;
 };
 
 /*--------------Get Branches-----------*/

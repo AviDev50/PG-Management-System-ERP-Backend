@@ -11,6 +11,7 @@ import {
 } from "./managers.controller.js";
 
 import { verifyToken } from "../../common/middlewares/auth.middleware.js";
+import { checkBranchAccess } from "../../common/middlewares/checkBranchAccess.middleware.js";
 
 import { allowRoles } from "../../common/middlewares/role.middleware.js";
 

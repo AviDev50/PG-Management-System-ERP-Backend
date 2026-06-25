@@ -16,6 +16,8 @@ import { verifyToken } from "../../common/middlewares/auth.middleware.js";
 
 import { allowRoles } from "../../common/middlewares/role.middleware.js";
 
+import { checkBranchAccess } from "../../common/middlewares/checkBranchAccess.middleware.js";
+
 // Amenities
 router.post("/create", verifyToken, allowRoles("super_admin"), createAmenity);
 
