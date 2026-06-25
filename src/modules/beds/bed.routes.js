@@ -9,6 +9,7 @@ import {
 } from "./bed.controller.js";
 
 const router = express.Router();
+import {checkBranchAccess} from "../../common/middlewares/checkBranchAccess.middleware.js";
 
 /*--------------Create Bed-----------*/
 router.post("/create", createBed);

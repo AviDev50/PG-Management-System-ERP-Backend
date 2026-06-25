@@ -1,4 +1,5 @@
 import express from "express";
+import { checkBranchAccess } from "../../common/middlewares/checkBranchAccess.middleware.js";
 
 const router = express.Router();
 

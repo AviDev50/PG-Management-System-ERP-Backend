@@ -93,6 +93,15 @@ export const createBranchQuery = async (data) => {
   return result.insertId;
 };
 
+export const addUserBranchQuery = async (userId, branchId) => {
+  const query = `
+    INSERT INTO user_branches (user_id, branch_id)
+    VALUES (?, ?)
+  `;
+  const [result] = await db.query(query, [userId, branchId]);
+  return result.insertId;
+};
+
 /*--------------Get Branch By Id-----------*/
 
 export const getBranchByIdQuery = async (branch_id) => {

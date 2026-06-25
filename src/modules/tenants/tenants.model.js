@@ -382,8 +382,7 @@ accommodation_date = ?,
 
 export const deleteTenantQuery = async (tenant_id) => {
   const query = `
-    UPDATE tenants
-    SET deleted_at = NOW()
+    DELETE FROM tenants
     WHERE tenant_id = ?
   `;
 
@@ -391,7 +390,6 @@ export const deleteTenantQuery = async (tenant_id) => {
 
   return result;
 };
-
 
 /*--------------Get Tenant By Phone Number-----------*/
 export const getTenantByPhoneQuery = async (phone) => {

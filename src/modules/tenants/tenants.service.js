@@ -1,4 +1,4 @@
-import bcryptjs from "bcryptjs";
+import bcrypt from "bcryptjs";
 import generateToken from "../../common/utils/generateToken.js";
 import {
   checkBedOccupied,
@@ -6,7 +6,6 @@ import {
   updateBedStatusQuery,
   getTenantsQuery,
   getTenantByIdQuery,
-  checkTenantOwnership,
   vacateTenantQuery,
   makeBedVacantQuery,
   getTenantsByBranchQuery,

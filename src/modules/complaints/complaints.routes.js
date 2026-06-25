@@ -9,6 +9,7 @@ import {
   getComplaintCountByBranch,
 } from "./complaints.controller.js";
 import { verifyToken } from "../../common/middlewares/auth.middleware.js";
+import { checkBranchAccess } from "../../common/middlewares/checkBranchAccess.middleware.js";
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ const router = express.Router();
 | CREATE COMPLAINT
 ===========================================================================*/
 
-router.post("/create", verifyToken, createComplaint);
+router.post("/create", verifyToken ,checkBranchAccess, createComplaint);
 
 /*===========================================================================
 | GET COMPLAINTS
