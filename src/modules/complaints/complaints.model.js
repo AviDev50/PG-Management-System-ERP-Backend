@@ -4,7 +4,7 @@ import db from "../../common/config/db.js";
 | GET TENANT BY ID
 ===========================================================================*/
 
-export const getTenantById = async (tenant_id) => {
+export async function getTenantById(tenant_id) {
   const query = `
     SELECT
       tenant_id,
@@ -18,13 +18,13 @@ export const getTenantById = async (tenant_id) => {
   const [results] = await db.query(query, [tenant_id]);
 
   return results[0];
-};
+}
 
 /*===========================================================================
 | CREATE COMPLAINT
 ===========================================================================*/
 
-export const createComplaintQuery = async (data) => {
+export async function createComplaintQuery(data) {
   const query = `
     INSERT INTO complaints
     (
@@ -48,13 +48,13 @@ export const createComplaintQuery = async (data) => {
   ]);
 
   return result;
-};
+}
 
 /*===========================================================================
 | GET ALL COMPLAINTS
 ===========================================================================*/
 
-export const getComplaintsQuery = async () => {
+export async function getComplaintsQuery() {
   const query = `
     SELECT
       c.complaint_id,
@@ -101,20 +101,13 @@ export const getComplaintsQuery = async () => {
   const [results] = await db.query(query);
 
   return results;
-};
-
-
-
+}
 
 /*===========================================================================
-
 | GET COMPLAINTS BY TENANT
-
 ===========================================================================*/
 
-export const getComplaintsByTenantQuery = async (
-  tenant_id
-) => {
+export async function getComplaintsByTenantQuery(tenant_id) {
   const query = `
     SELECT
       c.complaint_id,
@@ -159,22 +152,16 @@ export const getComplaintsByTenantQuery = async (
     ORDER BY c.complaint_id DESC
   `;
 
-  const [results] = await db.query(query, [
-    tenant_id,
-  ]);
+  const [results] = await db.query(query, [tenant_id]);
 
   return results;
-};
-
-
-
-
+}
 
 /*===========================================================================
 | GET SINGLE COMPLAINT
 ===========================================================================*/
 
-export const getComplaintById = async (complaint_id) => {
+export async function getComplaintById(complaint_id) {
   const query = `
     SELECT
       c.complaint_id,
@@ -222,13 +209,13 @@ export const getComplaintById = async (complaint_id) => {
   const [rows] = await db.query(query, [complaint_id]);
 
   return rows[0];
-};
+}
 
 /*===========================================================================
 | RESOLVE COMPLAINT
 ===========================================================================*/
 
-export const resolveComplaintQuery = async (complaint_id) => {
+export async function resolveComplaintQuery(complaint_id) {
   const query = `
     UPDATE complaints
     SET
@@ -240,38 +227,13 @@ export const resolveComplaintQuery = async (complaint_id) => {
   const [result] = await db.query(query, [complaint_id]);
 
   return result;
-};
-
-/*===========================================================================
-| UPDATE COMPLAINT
-===========================================================================*/
-
-export const updateComplaintQuery = async (complaint_id, data) => {
-  const query = `
-    UPDATE complaints
-    SET
-      title = ?,
-      description = ?,
-      category_id = ?,
-      updated_at = NOW()
-    WHERE complaint_id = ?
-  `;
-
-  const [result] = await db.query(query, [
-    data.title,
-    data.description,
-    data.category_id,
-    complaint_id,
-  ]);
-
-  return result;
-};
+}
 
 /*===========================================================================
 | DELETE COMPLAINT
 ===========================================================================*/
 
-export const deleteComplaintQuery = async (complaint_id) => {
+export async function deleteComplaintQuery(complaint_id) {
   const query = `
     UPDATE complaints
     SET
@@ -282,17 +244,13 @@ export const deleteComplaintQuery = async (complaint_id) => {
   const [result] = await db.query(query, [complaint_id]);
 
   return result;
-};
-
-
+}
 
 /*===========================================================================
-| GET COMPLAINT  BY BRANCH
+| GET COMPLAINTS BY BRANCH
 ===========================================================================*/
 
-export const getComplaintsByBranchQuery = async (
-  branch_id
-) => {
+export async function getComplaintsByBranchQuery(branch_id) {
   const query = `
     SELECT
       c.complaint_id,
@@ -336,9 +294,7 @@ export const getComplaintsByBranchQuery = async (
     ORDER BY c.complaint_id DESC
   `;
 
-  const [rows] = await db.query(query, [
-    branch_id,
-  ]);
+  const [rows] = await db.query(query, [branch_id]);
 
   return rows;
-};
+}

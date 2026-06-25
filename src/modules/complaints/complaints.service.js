@@ -4,10 +4,10 @@ import * as complaintModel from "./complaints.model.js";
 | CREATE COMPLAINT
 ===========================================================================*/
 
-export const createComplaint = async (payload, user) => {
+export async function createComplaint(payload, user) {
   const { title, description, category_id } = payload;
 
-  const tenant_id = user.user_id;
+  const tenant_id = user.tenant_id;
 
   /*--------------------------------------------------
   | CHECK TENANT
@@ -24,7 +24,7 @@ export const createComplaint = async (payload, user) => {
   }
 
   /*--------------------------------------------------
-  | CREATE COMPLAINT
+  | CREATE COMPLAINT (status defaults to 'open' via DB)
   --------------------------------------------------*/
 
   const result = await complaintModel.createComplaintQuery({
@@ -43,25 +43,25 @@ export const createComplaint = async (payload, user) => {
   const complaint = await complaintModel.getComplaintById(result.insertId);
 
   return complaint;
-};
+}
 
 /*===========================================================================
 | GET COMPLAINTS
 ===========================================================================*/
 
-export const getComplaints = async (user) => {
+export async function getComplaints(user) {
   if (user.role === "tenant") {
-    return await complaintModel.getComplaintsByTenantQuery(user.user_id);
+    return await complaintModel.getComplaintsByTenantQuery(user.tenant_id);
   }
 
   return await complaintModel.getComplaintsQuery();
-};
+}
 
 /*===========================================================================
 | RESOLVE COMPLAINT
 ===========================================================================*/
 
-export const resolveComplaint = async (complaint_id) => {
+export async function resolveComplaint(complaint_id) {
   const complaint = await complaintModel.getComplaintById(complaint_id);
 
   if (!complaint) {
@@ -78,29 +78,13 @@ export const resolveComplaint = async (complaint_id) => {
     complaint_id,
     status: "resolved",
   };
-};
-
-/*===========================================================================
-| UPDATE COMPLAINT
-===========================================================================*/
-
-export const updateComplaint = async (complaint_id, payload) => {
-  const complaint = await complaintModel.getComplaintById(complaint_id);
-
-  if (!complaint) {
-    throw new Error("Complaint not found");
-  }
-
-  await complaintModel.updateComplaintQuery(complaint_id, payload);
-
-  return await complaintModel.getComplaintById(complaint_id);
-};
+}
 
 /*===========================================================================
 | DELETE COMPLAINT
 ===========================================================================*/
 
-export const deleteComplaint = async (complaint_id) => {
+export async function deleteComplaint(complaint_id) {
   const complaint = await complaintModel.getComplaintById(complaint_id);
 
   if (!complaint) {
@@ -110,10 +94,12 @@ export const deleteComplaint = async (complaint_id) => {
   await complaintModel.deleteComplaintQuery(complaint_id);
 
   return complaint;
-};
+}
 
-/*-------------Get complaint by branch id-----------*/
+/*===========================================================================
+| GET COMPLAINTS BY BRANCH ID
+===========================================================================*/
 
-export const getComplaintsByBranchService = async (branch_id) => {
+export async function getComplaintByBranchId(branch_id) {
   return await complaintModel.getComplaintsByBranchQuery(branch_id);
-};
+}
