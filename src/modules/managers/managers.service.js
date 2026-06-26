@@ -1,41 +1,95 @@
-import managerModel from "./managers.model.js";
+import * as managerModel from "./managers.model.js";
 
-const createManager = async (body) => {
-  return await managerModel.createManager(body);
-};
+/*===========================================================================
+| CREATE MANAGER
+===========================================================================*/
 
-const getManagers = async () => {
-  return await managerModel.getManagers();
-};
+export async function createManager(payload) {
+  const { name, email, password, phone, salary, joining_date, branch_id } = payload;
 
-const getSingleManager = async (id) => {
-  return await managerModel.getSingleManager(id);
-};
+  if (!name || !email || !password || !phone || !branch_id) {
+    const error = new Error("name, email, password, phone and branch_id are required");
+    error.statusCode = 400;
+    throw error;
+  }
 
-const updateManager = async (id, body) => {
-  return await managerModel.updateManager(id, body);
-};
+  const result = await managerModel.createManagerQuery({
+    name,
+    email,
+    password,
+    phone,
+    salary,
+    joining_date,
+    branch_id,
+  });
 
-const deleteManager = async (id) => {
-  return await managerModel.deleteManager(id);
-};
+  return result;
+}
 
-/*---------------- Get Manager Permissions ----------------*/
-const getManagerPermissions = async (managerId) => {
-  return await managerModel.getManagerPermissions(managerId);
-};
+/*===========================================================================
+| GET MANAGERS (scoped to the requesting admin's assigned branches)
+===========================================================================*/
 
-/*---------------- Update Manager Permissions ----------------*/
-const updateManagerPermissions = async (managerId, body) => {
-  return await managerModel.updateManagerPermissions(managerId, body);
-};
+export async function getManagers(user) {
+  if (user.role === "super_admin") {
+    return await managerModel.getAllManagersQuery();
+  }
 
-export default {
-  createManager,
-  getManagers,
-  getSingleManager,
-  updateManager,
-  deleteManager,
-  getManagerPermissions,
-  updateManagerPermissions,
-};
+  return await managerModel.getManagersByUserBranchesQuery(user.user_id);
+}
+
+/*===========================================================================
+| GET SINGLE MANAGER
+===========================================================================*/
+
+export async function getSingleManager(manager_id) {
+  const manager = await managerModel.getSingleManagerQuery(manager_id);
+
+  if (!manager) {
+    const error = new Error("Manager not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return manager;
+}
+
+/*===========================================================================
+| UPDATE MANAGER
+===========================================================================*/
+
+export async function updateManager(manager_id, payload) {
+  const existing = await managerModel.getSingleManagerQuery(manager_id);
+
+  if (!existing) {
+    const error = new Error("Manager not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const phone = payload.phone ?? existing.phone;
+  const salary = payload.salary ?? existing.salary;
+  const joining_date = payload.joining_date ?? existing.joining_date;
+
+  await managerModel.updateManagerQuery(manager_id, { phone, salary, joining_date });
+
+  return await managerModel.getSingleManagerQuery(manager_id);
+}
+
+/*===========================================================================
+| DELETE MANAGER
+===========================================================================*/
+
+export async function deleteManager(manager_id) {
+  const existing = await managerModel.getSingleManagerQuery(manager_id);
+
+  if (!existing) {
+    const error = new Error("Manager not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  await managerModel.deleteManagerQuery(manager_id);
+
+  return existing;
+}
