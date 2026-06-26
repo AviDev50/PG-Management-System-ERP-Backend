@@ -13,6 +13,7 @@ import { verifyToken } from "../../common/middlewares/auth.middleware.js";
 import { allowRoles } from "../../common/middlewares/role.middleware.js";
 import upload from "../../common/config/upload.js";
 import { checkBranchAccess } from "../../common/middlewares/checkBranchAccess.middleware.js";
+import { checkPropertyAccess } from "../../common/middlewares/checkPropertyAccess.middleware.js";
 
 const router = express.Router();
 
@@ -27,6 +28,16 @@ router.post(
 
 /*--------------Get Branches-----------*/
 router.get("/", verifyToken, getBranches);
+
+/*--------------Get Branches By Property id-----*/
+
+router.get(
+  "/property/:property_id",
+  verifyToken,
+  allowRoles("admin"),
+  checkPropertyAccess({ idParam: "property_id" }),
+  getBranchesByPropertyId,
+);
 
 /*--------------Get Single Branch-----------*/
 router.get("/:id", verifyToken, getSingleBranch);
@@ -59,9 +70,6 @@ router.delete(
   }),
   deleteBranch,
 );
-/*---------Get Branches By Property id-----*/
-
-router.get("/property/:property_id", getBranchesByPropertyId);
 
 /*--------------Approve Branch-----------*/
 
