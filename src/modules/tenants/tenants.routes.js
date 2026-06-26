@@ -8,8 +8,7 @@ import {
   vacateTenant,
   getTenantById,
   updateTenant,
-  deleteTenant,
-  loginTenant,
+  deleteTenant
 } from "./tenants.controller.js";
 
 import { verifyToken } from "../../common/middlewares/auth.middleware.js";
@@ -57,8 +56,5 @@ router.put(
 /*--------------Delete Tenant-----------*/
 
 router.delete("/:tenant_id", deleteTenant);
-
-/*-------Tenant Login-------*/
-router.post("/login", loginTenant);
 
 export default router;

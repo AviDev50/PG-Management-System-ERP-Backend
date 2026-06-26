@@ -13,6 +13,24 @@ export async function createManagerQuery(data) {
   try {
     await connection.beginTransaction();
 
+    const [existingManager] = await connection.query(
+      `
+      SELECT manager_id
+      FROM managers
+      WHERE branch_id = ?
+        AND is_active = 1
+        AND deleted_at IS NULL
+      LIMIT 1
+      `,
+      [branch_id],
+    );
+
+    if (existingManager.length) {
+      const error = new Error("This branch already has an active manager assigned");
+      error.statusCode = 400;
+      throw error;
+    }
+
     const [roles] = await connection.query(
       `SELECT role_id FROM roles WHERE name = 'branch_manager' LIMIT 1`,
     );
@@ -72,17 +90,24 @@ export async function getAllManagersQuery() {
       u.user_id,
       u.name AS manager_name,
       u.email AS manager_email,
-      b.branch_id,
-      b.name AS branch_name,
       m.phone,
       m.salary,
       m.joining_date,
-      m.is_active
+      m.is_active,
+
+      b.branch_id,
+      b.name AS branch_name,
+
+      p.property_id,
+      p.name AS property_name
+
     FROM managers m
     JOIN users u
       ON u.user_id = m.user_id
     JOIN branches b
       ON b.branch_id = m.branch_id
+    JOIN properties p
+      ON p.property_id = b.property_id
     WHERE m.deleted_at IS NULL
     ORDER BY m.manager_id DESC
   `;
@@ -103,17 +128,24 @@ export async function getManagersByUserBranchesQuery(user_id) {
       u.user_id,
       u.name AS manager_name,
       u.email AS manager_email,
-      b.branch_id,
-      b.name AS branch_name,
       m.phone,
       m.salary,
       m.joining_date,
-      m.is_active
+      m.is_active,
+
+      b.branch_id,
+      b.name AS branch_name,
+
+      p.property_id,
+      p.name AS property_name
+
     FROM managers m
     JOIN users u
       ON u.user_id = m.user_id
     JOIN branches b
       ON b.branch_id = m.branch_id
+    JOIN properties p
+      ON p.property_id = b.property_id
     JOIN user_branches ub
       ON ub.branch_id = m.branch_id
     WHERE m.deleted_at IS NULL
