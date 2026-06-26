@@ -110,16 +110,28 @@ SELECT
   b.*,
   COUNT(DISTINCT r.room_id) AS total_rooms,
 
-  u.user_id AS manager_id,
-  u.name AS manager_name
+  m.manager_id,
+  m.phone AS manager_phone,
+  m.salary AS manager_salary,
+  m.joining_date AS manager_joining_date,
+  m.is_active AS manager_is_active,
+
+  u.user_id AS manager_user_id,
+  u.name AS manager_name,
+  u.email AS manager_email
 
 FROM branches b
 
 LEFT JOIN rooms r
   ON r.branch_id = b.branch_id
 
+LEFT JOIN managers m
+  ON m.branch_id = b.branch_id
+  AND m.is_active = 1
+  AND m.deleted_at IS NULL
+
 LEFT JOIN users u
-  ON u.user_id = b.manager_id
+  ON u.user_id = m.user_id
 
 WHERE b.branch_id = ?
 

@@ -6,46 +6,66 @@ import {
   getSingleManager,
   updateManager,
   deleteManager,
-  getManagerPermissions,
-  updateManagerPermissions,
 } from "./managers.controller.js";
 
 import { verifyToken } from "../../common/middlewares/auth.middleware.js";
 import { checkBranchAccess } from "../../common/middlewares/checkBranchAccess.middleware.js";
-
 import { allowRoles } from "../../common/middlewares/role.middleware.js";
 
 const router = express.Router();
 
 /*---------------- Create Manager ----------------*/
-router.post("/create", verifyToken, allowRoles("admin"), createManager);
+router.post(
+  "/create",
+  verifyToken,
+  allowRoles("admin"),
+  checkBranchAccess({ source: "body" }),
+  createManager,
+);
 
 /*---------------- Get Managers ----------------*/
 router.get("/", verifyToken, allowRoles("admin"), getManagers);
 
 /*---------------- Get Single Manager ----------------*/
-router.get("/:id", verifyToken, allowRoles("admin"), getSingleManager);
-
-/*---------------- Update Manager ----------------*/
-router.put("/update/:id", verifyToken, allowRoles("admin"), updateManager);
-
-/*---------------- Delete Manager ----------------*/
-router.delete("/delete/:id", verifyToken, allowRoles("admin"), deleteManager);
-
-/*---------------- Get Manager Permissions ----------------*/
 router.get(
-  "/permissions/:managerId",
+  "/:id",
   verifyToken,
   allowRoles("admin"),
-  getManagerPermissions,
+  checkBranchAccess({
+    source: "params",
+    table: "managers",
+    idParam: "id",
+    idColumn: "manager_id",
+  }),
+  getSingleManager,
 );
 
-/*---------------- Update Manager Permissions ----------------*/
+/*---------------- Update Manager ----------------*/
 router.put(
-  "/permissions/:managerId",
+  "/update/:id",
   verifyToken,
   allowRoles("admin"),
-  updateManagerPermissions,
+  checkBranchAccess({
+    source: "params",
+    table: "managers",
+    idParam: "id",
+    idColumn: "manager_id",
+  }),
+  updateManager,
+);
+
+/*---------------- Delete Manager ----------------*/
+router.delete(
+  "/delete/:id",
+  verifyToken,
+  allowRoles("admin"),
+  checkBranchAccess({
+    source: "params",
+    table: "managers",
+    idParam: "id",
+    idColumn: "manager_id",
+  }),
+  deleteManager,
 );
 
 export default router;

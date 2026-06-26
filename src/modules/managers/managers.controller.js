@@ -1,135 +1,76 @@
-import managerService from "./managers.service.js";
+import * as managerService from "./managers.service.js";
+import { successResponse, errorResponse } from "../../common/utils/response.js";
 
-/*---------------- Create Manager ----------------*/
-export const createManager = async (req, res) => {
+/*===========================================================================
+| CREATE MANAGER
+===========================================================================*/
+
+export async function createManager(req, res) {
   try {
-    const result = await managerService.createManager(req.body);
+    const data = await managerService.createManager(req.body);
 
-    res.status(201).json({
-      success: true,
-      message: "Manager created successfully",
-      data: result,
-    });
+    return successResponse(res, data, "Manager created successfully");
   } catch (error) {
     if (error.code === "ER_DUP_ENTRY") {
-      return res.status(400).json({
-        success: false,
-        message: "Manager already assigned to this branch",
-      });
+      return errorResponse(res, "This email or branch assignment already exists", 400);
     }
 
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return errorResponse(res, error.message, error.statusCode || 500);
   }
-};
+}
 
-/*---------------- Get Managers ----------------*/
-export const getManagers = async (req, res) => {
+/*===========================================================================
+| GET MANAGERS (filtered by admin's assigned branches)
+===========================================================================*/
+
+export async function getManagers(req, res) {
   try {
-    const result = await managerService.getManagers();
+    const data = await managerService.getManagers(req.user);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    return successResponse(res, data, "Managers fetched successfully");
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return errorResponse(res, error.message, error.statusCode || 500);
   }
-};
+}
 
-/*---------------- Get Single Manager ----------------*/
-export const getSingleManager = async (req, res) => {
+/*===========================================================================
+| GET SINGLE MANAGER
+===========================================================================*/
+
+export async function getSingleManager(req, res) {
   try {
-    const result = await managerService.getSingleManager(req.params.id);
+    const data = await managerService.getSingleManager(req.params.id);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    return successResponse(res, data, "Manager fetched successfully");
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return errorResponse(res, error.message, error.statusCode || 500);
   }
-};
+}
 
-/*---------------- Update Manager ----------------*/
-export const updateManager = async (req, res) => {
+/*===========================================================================
+| UPDATE MANAGER
+===========================================================================*/
+
+export async function updateManager(req, res) {
   try {
-    const result = await managerService.updateManager(req.params.id, req.body);
+    const data = await managerService.updateManager(req.params.id, req.body);
 
-    res.status(200).json({
-      success: true,
-      message: "Manager updated successfully",
-      data: result,
-    });
+    return successResponse(res, data, "Manager updated successfully");
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return errorResponse(res, error.message, error.statusCode || 500);
   }
-};
+}
 
-/*---------------- Delete Manager ----------------*/
-export const deleteManager = async (req, res) => {
+/*===========================================================================
+| DELETE MANAGER
+===========================================================================*/
+
+export async function deleteManager(req, res) {
   try {
-    await managerService.deleteManager(req.params.id);
+    const data = await managerService.deleteManager(req.params.id);
 
-    res.status(200).json({
-      success: true,
-      message: "Manager deleted successfully",
-    });
+    return successResponse(res, data, "Manager deleted successfully");
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return errorResponse(res, error.message, error.statusCode || 500);
   }
-};
-
-/*---------------- Get Manager Permissions ----------------*/
-export const getManagerPermissions = async (req, res) => {
-  try {
-    const result = await managerService.getManagerPermissions(
-      req.params.managerId,
-    );
-
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-/*---------------- Update Manager Permissions ----------------*/
-export const updateManagerPermissions = async (req, res) => {
-  try {
-    const result = await managerService.updateManagerPermissions(
-      req.params.managerId,
-      req.body,
-    );
-
-    res.status(200).json({
-      success: true,
-      message: "Permissions updated successfully",
-      data: result,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
+}

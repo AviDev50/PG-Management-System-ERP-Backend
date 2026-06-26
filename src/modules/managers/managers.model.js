@@ -1,32 +1,20 @@
 import db from "../../common/config/db.js";
-import bcryptjs from "bcryptjs";
+import bcrypt from "bcryptjs";
 
-/*---------------- Create Manager ----------------*/
+/*===========================================================================
+| CREATE MANAGER (user + manager record, single transaction)
+===========================================================================*/
 
-const createManager = async (data) => {
-  const {
-    name,
-    email,
-    password,
-    phone,
-    salary,
-    joining_date,
-    branch_id,
-  } = data;
+export async function createManagerQuery(data) {
+  const { name, email, password, phone, salary, joining_date, branch_id } = data;
 
   const connection = await db.getConnection();
 
   try {
     await connection.beginTransaction();
 
-    // branch_manager role
     const [roles] = await connection.query(
-      `
-      SELECT role_id
-      FROM roles
-      WHERE name = 'branch_manager'
-      LIMIT 1
-      `
+      `SELECT role_id FROM roles WHERE name = 'branch_manager' LIMIT 1`,
     );
 
     if (!roles.length) {
@@ -35,61 +23,29 @@ const createManager = async (data) => {
 
     const roleId = roles[0].role_id;
 
-   
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // create user
     const [userResult] = await connection.query(
       `
       INSERT INTO users
-      (
-        role_id,
-        name,
-        email,
-        password_hash
-      )
+        (role_id, name, email, password_hash)
       VALUES (?, ?, ?, ?)
       `,
-      [roleId, name, email, passwordHash]
+      [roleId, name, email, passwordHash],
     );
 
     const userId = userResult.insertId;
 
-    // create manager
     const [managerResult] = await connection.query(
       `
       INSERT INTO managers
-      (
-        user_id,
-        branch_id,
-        phone,
-        salary,
-        joining_date
-      )
+        (user_id, branch_id, phone, salary, joining_date)
       VALUES (?, ?, ?, ?, ?)
       `,
-      [
-        userId,
-        branch_id,
-        phone,
-        salary,
-        joining_date,
-      ]
+      [userId, branch_id, phone, salary, joining_date],
     );
 
     const managerId = managerResult.insertId;
-
-    // default permissions row
-    await connection.query(
-      `
-      INSERT INTO manager_permissions
-      (
-        manager_id
-      )
-      VALUES (?)
-      `,
-      [managerId]
-    );
 
     await connection.commit();
 
@@ -103,180 +59,162 @@ const createManager = async (data) => {
   } finally {
     connection.release();
   }
-};
+}
 
-/*---------------- Get All Managers ----------------*/
+/*===========================================================================
+| GET ALL MANAGERS (super_admin - unrestricted)
+===========================================================================*/
 
-const getManagers = async () => {
-  const [rows] = await db.query(
-    `
-      SELECT
-        m.manager_id,
-        u.user_id,
-        u.name AS manager_name,
-        b.branch_id,
-        b.name AS branch_name,
-        m.phone,
-        m.salary,
-        m.joining_date,
-        m.is_active
-      FROM managers m
-      JOIN users u
-        ON u.user_id = m.user_id
-      JOIN branches b
-        ON b.branch_id = m.branch_id
-      WHERE m.deleted_at IS NULL
-      ORDER BY m.manager_id DESC
-      `,
-  );
+export async function getAllManagersQuery() {
+  const query = `
+    SELECT
+      m.manager_id,
+      u.user_id,
+      u.name AS manager_name,
+      u.email AS manager_email,
+      b.branch_id,
+      b.name AS branch_name,
+      m.phone,
+      m.salary,
+      m.joining_date,
+      m.is_active
+    FROM managers m
+    JOIN users u
+      ON u.user_id = m.user_id
+    JOIN branches b
+      ON b.branch_id = m.branch_id
+    WHERE m.deleted_at IS NULL
+    ORDER BY m.manager_id DESC
+  `;
+
+  const [rows] = await db.query(query);
 
   return rows;
-};
+}
 
-/*---------------- Get Single Manager ----------------*/
+/*===========================================================================
+| GET MANAGERS SCOPED TO ADMIN'S ASSIGNED BRANCHES (user_branches)
+===========================================================================*/
 
-const getSingleManager = async (id) => {
-  const [rows] = await db.query(
-    `
-      SELECT
-        m.manager_id,
-        u.user_id,
-        u.name AS manager_name,
-        b.branch_id,
-        b.name AS branch_name,
-        m.phone,
-        m.salary,
-        m.joining_date,
-        m.is_active
-      FROM managers m
-      JOIN users u
-        ON u.user_id = m.user_id
-      JOIN branches b
-        ON b.branch_id = m.branch_id
-      WHERE m.manager_id = ?
-      `,
-    [id],
-  );
+export async function getManagersByUserBranchesQuery(user_id) {
+  const query = `
+    SELECT
+      m.manager_id,
+      u.user_id,
+      u.name AS manager_name,
+      u.email AS manager_email,
+      b.branch_id,
+      b.name AS branch_name,
+      m.phone,
+      m.salary,
+      m.joining_date,
+      m.is_active
+    FROM managers m
+    JOIN users u
+      ON u.user_id = m.user_id
+    JOIN branches b
+      ON b.branch_id = m.branch_id
+    JOIN user_branches ub
+      ON ub.branch_id = m.branch_id
+    WHERE m.deleted_at IS NULL
+      AND ub.user_id = ?
+    ORDER BY m.manager_id DESC
+  `;
+
+  const [rows] = await db.query(query, [user_id]);
+
+  return rows;
+}
+
+/*===========================================================================
+| GET SINGLE MANAGER
+===========================================================================*/
+
+export async function getSingleManagerQuery(manager_id) {
+  const query = `
+    SELECT
+      m.manager_id,
+      u.user_id,
+      u.name AS manager_name,
+      u.email AS manager_email,
+      b.branch_id,
+      b.name AS branch_name,
+      m.phone,
+      m.salary,
+      m.joining_date,
+      m.is_active
+    FROM managers m
+    JOIN users u
+      ON u.user_id = m.user_id
+    JOIN branches b
+      ON b.branch_id = m.branch_id
+    WHERE m.manager_id = ?
+      AND m.deleted_at IS NULL
+    LIMIT 1
+  `;
+
+  const [rows] = await db.query(query, [manager_id]);
 
   return rows[0];
-};
+}
 
-/*---------------- Update Manager ----------------*/
+/*===========================================================================
+| UPDATE MANAGER
+===========================================================================*/
 
-const updateManager = async (id, data) => {
+export async function updateManagerQuery(manager_id, data) {
   const { phone, salary, joining_date } = data;
 
-  const [result] = await db.query(
-    `
-      UPDATE managers
-      SET
-        phone = ?,
-        salary = ?,
-        joining_date = ?
-      WHERE manager_id = ?
-      `,
-    [phone, salary, joining_date, id],
-  );
+  const query = `
+    UPDATE managers
+    SET
+      phone = ?,
+      salary = ?,
+      joining_date = ?,
+      updated_at = NOW()
+    WHERE manager_id = ?
+  `;
+
+  const [result] = await db.query(query, [phone, salary, joining_date, manager_id]);
 
   return result;
-};
+}
 
-/*---------------- Delete Manager ----------------*/
+/*===========================================================================
+| DELETE MANAGER (also removes linked users row - project decision: cascade)
+===========================================================================*/
 
-const deleteManager = async (id) => {
-  const [result] = await db.query(
-    `
-      DELETE FROM managers
-      WHERE manager_id = ?
-      `,
-    [id],
-  );
+export async function deleteManagerQuery(manager_id) {
+  const connection = await db.getConnection();
 
-  return result;
-};
+  try {
+    await connection.beginTransaction();
 
+    const [managerRows] = await connection.query(
+      `SELECT user_id FROM managers WHERE manager_id = ? LIMIT 1`,
+      [manager_id],
+    );
 
-/*---------------- Get Manager Permissions ----------------*/
+    if (!managerRows.length) {
+      throw new Error("Manager not found");
+    }
 
-const getManagerPermissions = async (managerId) => {
-  const [rows] = await db.query(
-    `
-      SELECT
-        permission_id,
-        manager_id,
-        rooms,
-        beds,
-        tenants,
-        payments,
-        expenses,
-        amenities,
-        complaints,
-        meal_plans,
-        reports
-      FROM manager_permissions
-      WHERE manager_id = ?
-      LIMIT 1
-    `,
-    [managerId]
-  );
+    const { user_id } = managerRows[0];
 
-  return rows[0];
-};
+    const [result] = await connection.query(
+      `DELETE FROM managers WHERE manager_id = ?`,
+      [manager_id],
+    );
 
+    await connection.query(`DELETE FROM users WHERE user_id = ?`, [user_id]);
 
-/*---------------- Update Manager Permissions ----------------*/
+    await connection.commit();
 
-const updateManagerPermissions = async (managerId, data) => {
-  const {
-    rooms,
-    beds,
-    tenants,
-    payments,
-    expenses,
-    amenities,
-    complaints,
-    meal_plans,
-    reports,
-  } = data;
-
-  const [result] = await db.query(
-    `
-      UPDATE manager_permissions
-      SET
-        rooms = ?,
-        beds = ?,
-        tenants = ?,
-        payments = ?,
-        expenses = ?,
-        amenities = ?,
-        complaints = ?,
-        meal_plans = ?,
-        reports = ?
-      WHERE manager_id = ?
-    `,
-    [
-      rooms,
-      beds,
-      tenants,
-      payments,
-      expenses,
-      amenities,
-      complaints,
-      meal_plans,
-      reports,
-      managerId,
-    ]
-  );
-
-  return result;
-};
-
-export default {
-  createManager,
-  getManagers,
-  getSingleManager,
-  updateManager,
-  deleteManager,
-  getManagerPermissions,
-  updateManagerPermissions,
-};
+    return result;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
