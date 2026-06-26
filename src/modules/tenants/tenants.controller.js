@@ -149,15 +149,3 @@ export const deleteTenant = async (req, res) => {
   }
 };
 
-/*---------------Login Tenant----------------*/
-export const loginTenant = async (req, res) => {
-  try {
-    const { phone, password } = req.body;
-
-    const data = await tenantsService.loginTenant(phone, password);
-
-    return successResponse(res, data, "Login successful");
-  } catch (error) {
-    return errorResponse(res, error.message);
-  }
-};

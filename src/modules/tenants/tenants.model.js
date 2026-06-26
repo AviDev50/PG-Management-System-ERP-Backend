@@ -46,8 +46,6 @@ export const checkBedOccupied = async (bed_id) => {
   return results[0];
 };
 
-
-
 /*--------------Create Tenant-----------*/
 
 export const createTenantQuery = async (data) => {
@@ -151,10 +149,6 @@ export const createTenantQuery = async (data) => {
 
   return result;
 };
-
-
-
-
 
 /*--------------Update Bed Status-----------*/
 
