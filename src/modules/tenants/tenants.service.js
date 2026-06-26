@@ -206,6 +206,24 @@ export async function getTenantById(tenant_id) {
 }
 
 /*===========================================================================
+| GET TENANT DETAILS (TENANT SIDE - own profile only)
+===========================================================================*/
+
+export async function getTenantDetailsTenantSide(tenant_id) {
+  const tenant = await tenantModel.getTenantByIdQuery(tenant_id);
+
+  if (!tenant) {
+    const error = new Error("Tenant not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const { password_hash, ...safeTenant } = tenant;
+
+  return safeTenant;
+}
+
+/*===========================================================================
 | UPDATE TENANT
 ===========================================================================*/
 
