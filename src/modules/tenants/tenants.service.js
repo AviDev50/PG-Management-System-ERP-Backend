@@ -1,24 +1,11 @@
 import bcrypt from "bcryptjs";
-import generateToken from "../../common/utils/generateToken.js";
-import {
-  checkBedOccupied,
-  createTenantQuery,
-  updateBedStatusQuery,
-  getTenantsQuery,
-  getTenantByIdQuery,
-  vacateTenantQuery,
-  makeBedVacantQuery,
-  getTenantsByBranchQuery,
-  updateTenantQuery,
-  deleteTenantQuery,
-  getTenantByPhoneQuery,
-} from "./tenants.model.js";
+import * as tenantModel from "./tenants.model.js";
 
-/*--------------Create Tenant-----------*/
-export const createTenant = async (payload) => {
-  console.log("PAYLOAD =", payload);
-  console.log("ROOM ID =", payload.room_id);
+/*===========================================================================
+| CREATE TENANT
+===========================================================================*/
 
+export async function createTenant(payload) {
   const {
     bed_id,
     branch_id,
@@ -66,19 +53,29 @@ export const createTenant = async (payload) => {
     emergency_contact,
   } = payload;
 
-  // Check Bed Occupied
-
-  const occupiedBed = await checkBedOccupied(bed_id);
-
-  if (occupiedBed) {
-    throw new Error("Bed already occupied");
+  if (!bed_id || !branch_id || !room_id || !first_name || !last_name || !phone) {
+    const error = new Error("bed_id, branch_id, room_id, first_name, last_name and phone are required");
+    error.statusCode = 400;
+    throw error;
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const bed = await tenantModel.getBedByIdQuery(bed_id);
 
-  // Create Tenant
+  if (!bed) {
+    const error = new Error("Bed not found");
+    error.statusCode = 404;
+    throw error;
+  }
 
-  const result = await createTenantQuery({
+  if (bed.status === "occupied") {
+    const error = new Error("Bed already occupied");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+
+  const result = await tenantModel.createTenantQuery({
     bed_id,
     branch_id,
     room_id,
@@ -91,6 +88,7 @@ export const createTenant = async (payload) => {
     phone,
     email,
     password_hash: hashedPassword,
+
     gender,
     dob,
     marital_status,
@@ -123,161 +121,132 @@ export const createTenant = async (payload) => {
     security_deposit,
     emergency_contact,
   });
-  await updateBedStatusQuery(bed_id);
 
-  const tenant = await getTenantByIdQuery(result.insertId);
+  await tenantModel.updateBedStatusQuery(bed_id, "occupied");
 
-  return tenant;
-};
+  return await tenantModel.getTenantByIdQuery(result.insertId);
+}
 
-/*--------------Get Tenants-----------*/
+/*===========================================================================
+| GET TENANTS (scoped to admin's assigned branches)
+===========================================================================*/
 
-export const getTenants = async () => {
-  const tenants = await getTenantsQuery();
+export async function getTenants(user) {
+  const tenants =
+    user.role === "super_admin"
+      ? await tenantModel.getAllTenantsQuery()
+      : await tenantModel.getTenantsByUserBranchesQuery(user.user_id);
 
-  const active = tenants.filter(
-    (tenant) => tenant.status?.toLowerCase() === "active",
-  );
-
-  const pending = tenants.filter(
-    (tenant) => tenant.status?.toLowerCase() === "pending",
-  );
-
-  const release = tenants.filter(
-    (tenant) => tenant.status?.toLowerCase() === "release",
-  );
-
-  return {
-    active_count: active.length,
-    pending_count: pending.length,
-    release_count: release.length,
-
-    active,
-    pending,
-    release,
-  };
-};
-
-/*--------------Vacate Tenant-----------*/
-
-export const vacateTenant = async (tenant_id) => {
-  const tenant = await getTenantByIdQuery(tenant_id);
-
-  if (!tenant) {
-    throw new Error("Tenant not found");
-  }
-
-  await vacateTenantQuery(tenant_id);
-
-  await makeBedVacantQuery(tenant.bed_id);
-
-  return null;
-};
-
-/*-------get Tenant By branch id------------*/
-
-export const getTenantCountByBranch = async (branch_id) => {
-  const tenants = await getTenantsByBranchQuery(branch_id);
-
-  const active = tenants.filter(
-    (tenant) => tenant.status?.toLowerCase() === "active",
-  );
-
-  const pending = tenants.filter(
-    (tenant) => tenant.status?.toLowerCase() === "pending",
-  );
-
-  const release = tenants.filter(
-    (tenant) =>
-      tenant.status?.toLowerCase() === "release" ||
-      tenant.status?.toLowerCase() === "vacated",
-  );
+  const active = tenants.filter((tenant) => tenant.status === "active");
+  const vacated = tenants.filter((tenant) => tenant.status === "vacated");
 
   return {
     total_tenants: tenants.length,
-
     active_count: active.length,
-    pending_count: pending.length,
-    release_count: release.length,
+    vacated_count: vacated.length,
 
     active,
-    pending,
-    release,
+    vacated,
   };
-};
+}
 
-/*-------Get Tenant By ID------------*/
+/*===========================================================================
+| VACATE TENANT
+===========================================================================*/
 
-export const getTenantById = async (tenant_id) => {
-  const tenant = await getTenantByIdQuery(tenant_id);
+export async function vacateTenant(tenant_id) {
+  const tenant = await tenantModel.getTenantByIdQuery(tenant_id);
 
   if (!tenant) {
-    throw new Error("Tenant not found");
+    const error = new Error("Tenant not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  await tenantModel.vacateTenantQuery(tenant_id);
+  await tenantModel.updateBedStatusQuery(tenant.bed_id, "vacant");
+
+  return await tenantModel.getTenantByIdQuery(tenant_id);
+}
+
+/*===========================================================================
+| GET TENANT COUNT/LIST BY BRANCH
+===========================================================================*/
+
+export async function getTenantCountByBranch(branch_id) {
+  const tenants = await tenantModel.getTenantsByBranchQuery(branch_id);
+
+  const active = tenants.filter((tenant) => tenant.status === "active");
+  const vacated = tenants.filter((tenant) => tenant.status === "vacated");
+
+  return {
+    total_tenants: tenants.length,
+    active_count: active.length,
+    vacated_count: vacated.length,
+
+    active,
+    vacated,
+  };
+}
+
+/*===========================================================================
+| GET TENANT BY ID
+===========================================================================*/
+
+export async function getTenantById(tenant_id) {
+  const tenant = await tenantModel.getTenantByIdQuery(tenant_id);
+
+  if (!tenant) {
+    const error = new Error("Tenant not found");
+    error.statusCode = 404;
+    throw error;
   }
 
   return tenant;
-};
+}
 
-/*--------------Update Tenant-----------*/
+/*===========================================================================
+| UPDATE TENANT
+===========================================================================*/
 
-export const updateTenant = async (tenant_id, payload) => {
-  const tenant = await getTenantByIdQuery(tenant_id);
+export async function updateTenant(tenant_id, payload) {
+  const tenant = await tenantModel.getTenantByIdQuery(tenant_id);
 
   if (!tenant) {
-    throw new Error("Tenant not found");
+    const error = new Error("Tenant not found");
+    error.statusCode = 404;
+    throw error;
   }
+
+  // password_hash / bed_id / branch_id ko yahan se update nahi karne dena -
+  // wo alag dedicated flows (password change, transfer) se hone chahiye
+  const { password_hash, password, bed_id, branch_id, room_id, ...safePayload } = payload;
 
   const updatedData = {
     ...tenant,
-    ...payload,
+    ...safePayload,
   };
 
-  await updateTenantQuery(tenant_id, updatedData);
+  await tenantModel.updateTenantQuery(tenant_id, updatedData);
 
-  return await getTenantByIdQuery(tenant_id);
-};
+  return await tenantModel.getTenantByIdQuery(tenant_id);
+}
 
-/*--------------Delete Tenant-----------*/
+/*===========================================================================
+| DELETE TENANT
+===========================================================================*/
 
-export const deleteTenant = async (tenant_id) => {
-  const tenant = await getTenantByIdQuery(tenant_id);
+export async function deleteTenant(tenant_id) {
+  const tenant = await tenantModel.getTenantByIdQuery(tenant_id);
 
   if (!tenant) {
-    throw new Error("Tenant not found");
+    const error = new Error("Tenant not found");
+    error.statusCode = 404;
+    throw error;
   }
 
-  await deleteTenantQuery(tenant_id);
+  await tenantModel.deleteTenantQuery(tenant_id);
+  await tenantModel.updateBedStatusQuery(tenant.bed_id, "vacant");
 
   return tenant;
-};
-
-/*--------------Login Tenant--------------*/
-
-export const loginTenant = async (phone, password) => {
-  const tenant = await getTenantByPhoneQuery(phone);
-
-  if (!tenant) {
-    throw new Error("Invalid phone number");
-  }
-
-  const isMatch = await bcrypt.compare(password, tenant.password_hash);
-
-  if (!isMatch) {
-    throw new Error("Invalid password");
-  }
-
-  const token = generateToken({
-    user_id: tenant.tenant_id,
-    role: "tenant",
-    role_id: null,
-    manager_id: null,
-    branch_id: tenant.branch_id,
-  });
-
-  const { password_hash, ...tenantData } = tenant;
-
-  return {
-    token,
-    tenant: tenantData,
-  };
-};
+}

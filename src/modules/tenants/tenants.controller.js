@@ -3,16 +3,16 @@ import * as tenantsService from "./tenants.service.js";
 import { successResponse, errorResponse } from "../../common/utils/response.js";
 import cloudinary from "../../common/config/cloudinary.js";
 
-/*--------------Create Tenant-----------*/
+/*===========================================================================
+| CREATE TENANT
+===========================================================================*/
 
-export const createTenant = async (req, res) => {
+export async function createTenant(req, res) {
   try {
     if (req.files?.profile_image?.[0]) {
       const profileUpload = await cloudinary.uploader.upload(
         req.files.profile_image[0].path,
-        {
-          folder: "pg_erp/profile",
-        },
+        { folder: "pg_erp/profile" },
       );
 
       req.body.profile_image = profileUpload.secure_url;
@@ -21,9 +21,7 @@ export const createTenant = async (req, res) => {
     if (req.files?.document_image?.[0]) {
       const documentUpload = await cloudinary.uploader.upload(
         req.files.document_image[0].path,
-        {
-          folder: "pg_erp/documents",
-        },
+        { folder: "pg_erp/documents" },
       );
 
       req.body.document_image = documentUpload.secure_url;
@@ -33,51 +31,59 @@ export const createTenant = async (req, res) => {
 
     return successResponse(res, data, "Tenant created successfully");
   } catch (error) {
-    return errorResponse(res, error.message);
+    return errorResponse(res, error.message, error.statusCode || 500);
   }
-};
+}
 
-/*--------------Get Tenants-----------*/
+/*===========================================================================
+| GET TENANTS
+===========================================================================*/
 
-export const getTenants = async (req, res) => {
+export async function getTenants(req, res) {
   try {
     const data = await tenantsService.getTenants(req.user);
 
     return successResponse(res, data, "Tenants fetched successfully");
   } catch (error) {
-    return errorResponse(res, error.message);
+    return errorResponse(res, error.message, error.statusCode || 500);
   }
-};
+}
 
-/*--------------Vacate Tenant-----------*/
+/*===========================================================================
+| VACATE TENANT
+===========================================================================*/
 
-export const vacateTenant = async (req, res) => {
+export async function vacateTenant(req, res) {
   try {
     const data = await tenantsService.vacateTenant(req.params.id);
 
     return successResponse(res, data, "Tenant vacated successfully");
   } catch (error) {
-    return errorResponse(res, error.message);
+    return errorResponse(res, error.message, error.statusCode || 500);
   }
-};
+}
 
-/*-------get Tenant By branch id------------*/
+/*===========================================================================
+| GET TENANT COUNT BY BRANCH
+===========================================================================*/
 
-export const getTenantCountByBranch = async (req, res) => {
+export async function getTenantCountByBranch(req, res) {
   try {
     const { branch_id } = req.params;
 
     const data = await tenantsService.getTenantCountByBranch(branch_id);
 
-    return successResponse(res, data, "Tenant fetched successfully");
+    return successResponse(res, data, "Tenants fetched successfully");
   } catch (error) {
-    return errorResponse(res, error.message);
+    return errorResponse(res, error.message, error.statusCode || 500);
   }
-};
+}
 
-/*-------Get Tenant By ID------------*/
+/*===========================================================================
+| GET TENANT BY ID
+===========================================================================*/
 
-export const getTenantById = async (req, res) => {
+export async function getTenantById(req, res) {
   try {
     const { tenant_id } = req.params;
 
@@ -85,23 +91,22 @@ export const getTenantById = async (req, res) => {
 
     return successResponse(res, data, "Tenant fetched successfully");
   } catch (error) {
-    return errorResponse(res, error.message);
+    return errorResponse(res, error.message, error.statusCode || 500);
   }
-};
+}
 
-/*--------------Update Tenant-----------*/
+/*===========================================================================
+| UPDATE TENANT
+===========================================================================*/
 
-
-export const updateTenant = async (req, res) => {
+export async function updateTenant(req, res) {
   try {
     const { tenant_id } = req.params;
 
     if (req.files?.profile_image?.[0]) {
       const profileUpload = await cloudinary.uploader.upload(
         req.files.profile_image[0].path,
-        {
-          folder: "pg_erp/profile",
-        }
+        { folder: "pg_erp/profile" },
       );
 
       req.body.profile_image = profileUpload.secure_url;
@@ -110,34 +115,25 @@ export const updateTenant = async (req, res) => {
     if (req.files?.document_image?.[0]) {
       const documentUpload = await cloudinary.uploader.upload(
         req.files.document_image[0].path,
-        {
-          folder: "pg_erp/documents",
-        }
+        { folder: "pg_erp/documents" },
       );
 
       req.body.document_image = documentUpload.secure_url;
     }
 
-    const data = await tenantsService.updateTenant(
-      tenant_id,
-      req.body
-    );
+    const data = await tenantsService.updateTenant(tenant_id, req.body);
 
-    return successResponse(
-      res,
-      data,
-      "Tenant updated successfully"
-    );
+    return successResponse(res, data, "Tenant updated successfully");
   } catch (error) {
-    console.log(error);
-    return errorResponse(res, error.message);
+    return errorResponse(res, error.message, error.statusCode || 500);
   }
-};
+}
 
+/*===========================================================================
+| DELETE TENANT
+===========================================================================*/
 
-/*--------------Delete Tenant-----------*/
-
-export const deleteTenant = async (req, res) => {
+export async function deleteTenant(req, res) {
   try {
     const { tenant_id } = req.params;
 
@@ -145,7 +141,6 @@ export const deleteTenant = async (req, res) => {
 
     return successResponse(res, data, "Tenant deleted successfully");
   } catch (error) {
-    return errorResponse(res, error.message);
+    return errorResponse(res, error.message, error.statusCode || 500);
   }
-};
-
+}
