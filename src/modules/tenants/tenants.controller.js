@@ -96,6 +96,20 @@ export async function getTenantById(req, res) {
 }
 
 /*===========================================================================
+| GET TENANT DETAILS (TENANT SIDE - own profile only)
+===========================================================================*/
+
+export async function getTenantDetailsTenantSide(req, res) {
+  try {
+    const data = await tenantsService.getTenantDetailsTenantSide(req.user.tenant_id);
+
+    return successResponse(res, data, "Tenant details fetched successfully");
+  } catch (error) {
+    return errorResponse(res, error.message, error.statusCode || 500);
+  }
+}
+
+/*===========================================================================
 | UPDATE TENANT
 ===========================================================================*/
 

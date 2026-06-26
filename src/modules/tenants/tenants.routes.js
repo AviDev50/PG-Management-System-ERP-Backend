@@ -7,11 +7,13 @@ import {
   getTenants,
   vacateTenant,
   getTenantById,
+  getTenantDetailsTenantSide,
   updateTenant,
   deleteTenant,
 } from "./tenants.controller.js";
 
 import { verifyToken } from "../../common/middlewares/auth.middleware.js";
+import { verifyTenantToken } from "../../common/utils/generateTenantToken.js"
 import { allowRoles } from "../../common/middlewares/role.middleware.js";
 import { checkBranchAccess } from "../../common/middlewares/checkBranchAccess.middleware.js";
 
@@ -65,7 +67,11 @@ router.get(
   getTenantCountByBranch,
 );
 
-/*-------Get Tenant By ID------------*/
+/*-------Get Own Details (TENANT SIDE)------------*/
+
+router.get("/me", verifyTenantToken, getTenantDetailsTenantSide);
+
+/*-------Get Tenant By ID (ADMIN SIDE)------------*/
 
 router.get(
   "/:tenant_id",
