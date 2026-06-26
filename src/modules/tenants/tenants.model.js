@@ -1,59 +1,50 @@
 import db from "../../common/config/db.js";
 
-/*--------------Check Bed Ownership-----------*/
+/*===========================================================================
+| CHECK BED OCCUPIED
+===========================================================================*/
 
-export const checkBedOwnership = async (bed_id, user_id) => {
+export async function checkBedOccupied(bed_id) {
   const query = `
-      SELECT beds.*
-      FROM beds
-
-      JOIN rooms
-      ON rooms.room_id =
-      beds.room_id
-
-      JOIN branches
-      ON branches.branch_id =
-      rooms.branch_id
-
-      JOIN properties
-      ON properties.property_id =
-      branches.property_id
-
-      WHERE beds.bed_id = ?
-      AND properties.user_id = ?
-
-      LIMIT 1
-    `;
-
-  const [results] = await db.query(query, [bed_id, user_id]);
-
-  return results[0];
-};
-
-/*--------------Check Bed Occupied-----------*/
-
-export const checkBedOccupied = async (bed_id) => {
-  const query = `
-      SELECT *
-      FROM beds
-      WHERE bed_id = ?
+    SELECT *
+    FROM beds
+    WHERE bed_id = ?
       AND status = 'occupied'
-      LIMIT 1
-    `;
+    LIMIT 1
+  `;
 
   const [results] = await db.query(query, [bed_id]);
 
   return results[0];
-};
+}
 
-/*--------------Create Tenant-----------*/
+/*===========================================================================
+| GET BED BY ID (basic existence check)
+===========================================================================*/
 
-export const createTenantQuery = async (data) => {
+export async function getBedByIdQuery(bed_id) {
+  const query = `
+    SELECT bed_id, room_id, status
+    FROM beds
+    WHERE bed_id = ?
+    LIMIT 1
+  `;
+
+  const [results] = await db.query(query, [bed_id]);
+
+  return results[0];
+}
+
+/*===========================================================================
+| CREATE TENANT
+===========================================================================*/
+
+export async function createTenantQuery(data) {
   const query = `
     INSERT INTO tenants
     (
       bed_id,
-        room_id, 
+      room_id,
       branch_id,
       room_number,
 
@@ -97,7 +88,7 @@ export const createTenantQuery = async (data) => {
       security_deposit,
       emergency_contact
     )
-    VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const [result] = await db.query(query, [
@@ -112,7 +103,7 @@ export const createTenantQuery = async (data) => {
 
     data.phone,
     data.email,
-    data.password_hash, 
+    data.password_hash,
 
     data.gender,
     data.dob,
@@ -148,103 +139,84 @@ export const createTenantQuery = async (data) => {
   ]);
 
   return result;
-};
+}
 
-/*--------------Update Bed Status-----------*/
+/*===========================================================================
+| UPDATE BED STATUS
+===========================================================================*/
 
-export const updateBedStatusQuery = async (bed_id) => {
+export async function updateBedStatusQuery(bed_id, status) {
   const query = `
-      UPDATE beds
-      SET status = 'occupied'
-      WHERE bed_id = ?
-    `;
+    UPDATE beds
+    SET status = ?
+    WHERE bed_id = ?
+  `;
 
-  const [result] = await db.query(query, [bed_id]);
+  const [result] = await db.query(query, [status, bed_id]);
 
   return result;
-};
+}
 
-/*--------------Get Tenants-----------*/
+/*===========================================================================
+| GET ALL TENANTS (scoped to admin's assigned branches)
+===========================================================================*/
 
-export const getTenantsQuery = async () => {
+export async function getTenantsByUserBranchesQuery(user_id) {
   const query = `
-      SELECT *
-      FROM tenants
-      WHERE deleted_at IS NULL
-      ORDER BY tenant_id DESC
-    `;
+    SELECT t.*
+    FROM tenants t
+    JOIN user_branches ub
+      ON ub.branch_id = t.branch_id
+    WHERE t.deleted_at IS NULL
+      AND ub.user_id = ?
+    ORDER BY t.tenant_id DESC
+  `;
+
+  const [results] = await db.query(query, [user_id]);
+
+  return results;
+}
+
+/*===========================================================================
+| GET ALL TENANTS (super_admin - unrestricted)
+===========================================================================*/
+
+export async function getAllTenantsQuery() {
+  const query = `
+    SELECT *
+    FROM tenants
+    WHERE deleted_at IS NULL
+    ORDER BY tenant_id DESC
+  `;
 
   const [results] = await db.query(query);
 
   return results;
-};
+}
 
-/*--------------Check Tenant Ownership-----------*/
+/*===========================================================================
+| VACATE TENANT
+===========================================================================*/
 
-export const checkTenantOwnership = async (tenant_id, user_id) => {
+export async function vacateTenantQuery(tenant_id) {
   const query = `
-      SELECT tenants.*
-      FROM tenants
-
-      JOIN beds
-      ON beds.bed_id =
-      tenants.bed_id
-
-      JOIN rooms
-      ON rooms.room_id =
-      beds.room_id
-
-      JOIN branches
-      ON branches.branch_id =
-      rooms.branch_id
-
-      JOIN properties
-      ON properties.property_id =
-      branches.property_id
-
-      WHERE tenants.tenant_id = ?
-      AND properties.user_id = ?
-
-      LIMIT 1
-    `;
-
-  const [results] = await db.query(query, [tenant_id, user_id]);
-
-  return results[0];
-};
-
-/*--------------Vacate Tenant-----------*/
-
-export const vacateTenantQuery = async (tenant_id) => {
-  const query = `
-      UPDATE tenants
-      SET
-        status = 'vacated',
-        vacated_date = CURDATE()
-      WHERE tenant_id = ?
-    `;
+    UPDATE tenants
+    SET
+      status = 'vacated',
+      vacated_date = CURDATE()
+    WHERE tenant_id = ?
+  `;
 
   const [result] = await db.query(query, [tenant_id]);
 
   return result;
-};
+}
 
-/*--------------Make Bed Vacant-----------*/
+/*===========================================================================
+| GET TENANT BY ID
+===========================================================================*/
 
-export const makeBedVacantQuery = async (bed_id) => {
-  const query = `
-      UPDATE beds
-      SET status = 'vacant'
-      WHERE bed_id = ?
-    `;
-
-  const [result] = await db.query(query, [bed_id]);
-
-  return result;
-};
-
-/*-------------Get data when we create tenant------------*/
-export const getTenantByIdQuery = async (tenant_id) => {
+export async function getTenantByIdQuery(tenant_id) {
   const query = `
     SELECT
       tenants.*,
@@ -263,26 +235,31 @@ export const getTenantByIdQuery = async (tenant_id) => {
   const [rows] = await db.query(query, [tenant_id]);
 
   return rows[0];
-};
+}
 
-/*-------get Tenant By branch id------------*/
-export const getTenantsByBranchQuery = async (branch_id) => {
+/*===========================================================================
+| GET TENANTS BY BRANCH ID
+===========================================================================*/
+
+export async function getTenantsByBranchQuery(branch_id) {
   const query = `
     SELECT *
     FROM tenants
     WHERE branch_id = ?
-    AND deleted_at IS NULL
+      AND deleted_at IS NULL
     ORDER BY tenant_id DESC
   `;
 
   const [rows] = await db.query(query, [branch_id]);
 
   return rows;
-};
+}
 
-/*--------------Update Tenant Details-----------------*/
+/*===========================================================================
+| UPDATE TENANT DETAILS
+===========================================================================*/
 
-export const updateTenantQuery = async (tenant_id, data) => {
+export async function updateTenantQuery(tenant_id, data) {
   const query = `
     UPDATE tenants
     SET
@@ -307,7 +284,7 @@ export const updateTenantQuery = async (tenant_id, data) => {
 
       college_name = ?,
       registration_date = ?,
-accommodation_date = ?,
+      accommodation_date = ?,
 
       father_name = ?,
       father_contact = ?,
@@ -370,11 +347,13 @@ accommodation_date = ?,
   ]);
 
   return result;
-};
+}
 
-/*--------------Delete Tenant-----------*/
+/*===========================================================================
+| DELETE TENANT
+===========================================================================*/
 
-export const deleteTenantQuery = async (tenant_id) => {
+export async function deleteTenantQuery(tenant_id) {
   const query = `
     DELETE FROM tenants
     WHERE tenant_id = ?
@@ -383,21 +362,4 @@ export const deleteTenantQuery = async (tenant_id) => {
   const [result] = await db.query(query, [tenant_id]);
 
   return result;
-};
-
-/*--------------Get Tenant By Phone Number-----------*/
-export const getTenantByPhoneQuery = async (phone) => {
-  const query = `
-    SELECT *
-    FROM tenants
-    WHERE phone = ?
-    AND password_hash IS NOT NULL
-    AND deleted_at IS NULL
-    ORDER BY tenant_id DESC
-    LIMIT 1
-  `;
-
-  const [rows] = await db.query(query, [phone]);
-
-  return rows[0];
-};
+}
