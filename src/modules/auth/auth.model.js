@@ -11,7 +11,8 @@ export const findUserByEmail = async (email) => {
       roles.name AS role,
       m.manager_id,
       m.branch_id,
-      p.property_id
+      p.property_id,
+      p.status AS property_status
 
     FROM users
 

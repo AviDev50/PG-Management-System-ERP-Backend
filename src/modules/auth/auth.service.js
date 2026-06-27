@@ -63,6 +63,12 @@ export async function login({ email, password }) {
     throw error;
   }
 
+  if (user.role === "admin" && user.property_status !== "approved") {
+  const error = new Error("Your property is pending approval. Please wait until it is approved by the super admin.");
+  error.statusCode = 403;
+  throw error;
+}
+
   const token = generateToken(user);
 
   let branches = [];
