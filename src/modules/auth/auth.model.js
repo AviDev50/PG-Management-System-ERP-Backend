@@ -42,6 +42,7 @@ export const getBranchesByUserId = async (user_id) => {
     WHERE ub.user_id = ?
       AND ub.deleted_at IS NULL
       AND b.deleted_at IS NULL
+      AND b.approval_status = 'approved'
   `;
 
   const [results] = await db.query(query, [user_id]);
