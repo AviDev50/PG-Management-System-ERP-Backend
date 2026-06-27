@@ -187,6 +187,52 @@ ORDER BY b.branch_id DESC
   }));
 };
 
+// export const getBranchesQuery = async () => {
+//   const query = `
+//     SELECT
+//       b.*,
+//       COUNT(DISTINCT r.room_id) AS total_rooms,
+
+//       m.manager_id,
+//       m.phone AS manager_phone,
+//       m.salary AS manager_salary,
+//       m.joining_date AS manager_joining_date,
+//       m.is_active AS manager_is_active,
+
+//       u.user_id AS manager_user_id,
+//       u.name AS manager_name,
+//       u.email AS manager_email
+
+//     FROM branches b
+
+//     LEFT JOIN rooms r
+//       ON r.branch_id = b.branch_id
+
+//     LEFT JOIN managers m
+//       ON m.branch_id = b.branch_id
+//       AND m.is_active = 1
+//       AND m.deleted_at IS NULL
+
+//     LEFT JOIN users u
+//       ON u.user_id = m.user_id
+
+//     WHERE b.deleted_at IS NULL
+
+//     GROUP BY b.branch_id
+
+//     ORDER BY b.branch_id DESC
+//   `;
+
+//   const [results] = await db.query(query);
+
+//   return results.map((branch) => ({
+//     ...branch,
+//     ideal_for: parseArrayField(branch.ideal_for),
+//     amenities: parseArrayField(branch.amenities),
+//     branch_photos: parseArrayField(branch.branch_photos),
+//   }));
+// };
+
 /*--------------Get Single Branch-----------*/
 
 export const getSingleBranchQuery = async (branch_id, user_id) => {
@@ -288,29 +334,77 @@ export const deleteBranchQuery = async (branch_id) => {
 
 /*---------Get Branches By Property id-----*/
 
+// export const getBranchesByPropertyIdQuery = async (property_id) => {
+//   const query = `
+//    SELECT
+//   b.*,
+//   COUNT(DISTINCT r.room_id) AS total_rooms,
+
+//   u.user_id AS manager_id,
+//   u.name AS manager_name
+
+// FROM branches b
+
+// LEFT JOIN rooms r
+//   ON r.branch_id = b.branch_id
+
+// LEFT JOIN users u
+//   ON u.user_id = b.manager_id
+
+// WHERE b.property_id = ?
+//   AND b.deleted_at IS NULL
+
+// GROUP BY b.branch_id
+
+// ORDER BY b.branch_id DESC
+//   `;
+
+//   const [results] = await db.query(query, [property_id]);
+
+//   return results.map((branch) => ({
+//     ...branch,
+//     ideal_for: parseArrayField(branch.ideal_for),
+//     amenities: parseArrayField(branch.amenities),
+//     branch_photos: parseArrayField(branch.branch_photos),
+//   }));
+// };
+
+
 export const getBranchesByPropertyIdQuery = async (property_id) => {
   const query = `
-   SELECT
-  b.*,
-  COUNT(DISTINCT r.room_id) AS total_rooms,
+    SELECT
+      b.*,
+      COUNT(DISTINCT r.room_id) AS total_rooms,
 
-  u.user_id AS manager_id,
-  u.name AS manager_name
+      m.manager_id,
+      m.phone AS manager_phone,
+      m.salary AS manager_salary,
+      m.joining_date AS manager_joining_date,
+      m.is_active AS manager_is_active,
 
-FROM branches b
+      u.user_id AS manager_user_id,
+      u.name AS manager_name,
+      u.email AS manager_email
 
-LEFT JOIN rooms r
-  ON r.branch_id = b.branch_id
+    FROM branches b
 
-LEFT JOIN users u
-  ON u.user_id = b.manager_id
+    LEFT JOIN rooms r
+      ON r.branch_id = b.branch_id
 
-WHERE b.property_id = ?
-  AND b.deleted_at IS NULL
+    LEFT JOIN managers m
+      ON m.branch_id = b.branch_id
+      AND m.is_active = 1
+      AND m.deleted_at IS NULL
 
-GROUP BY b.branch_id
+    LEFT JOIN users u
+      ON u.user_id = m.user_id
 
-ORDER BY b.branch_id DESC
+    WHERE b.property_id = ?
+      AND b.deleted_at IS NULL
+
+    GROUP BY b.branch_id
+
+    ORDER BY b.branch_id DESC
   `;
 
   const [results] = await db.query(query, [property_id]);
