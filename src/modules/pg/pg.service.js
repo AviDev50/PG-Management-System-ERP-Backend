@@ -9,7 +9,7 @@ import {
   createUserQuery,
 } from "./pg.model.js";
 
-import bcryptjs from "bcryptjs";
+import bcrypt from "bcryptjs";
 
 /*------------------Create PG-------------*/
 
