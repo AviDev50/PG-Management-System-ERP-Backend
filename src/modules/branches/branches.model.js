@@ -93,14 +93,14 @@ export const createBranchQuery = async (data) => {
   return result.insertId;
 };
 
-export const addUserBranchQuery = async (userId, branchId) => {
-  const query = `
-    INSERT INTO user_branches (user_id, branch_id)
-    VALUES (?, ?)
-  `;
-  const [result] = await db.query(query, [userId, branchId]);
-  return result.insertId;
-};
+// export const addUserBranchQuery = async (userId, branchId) => {
+//   const query = `
+//     INSERT INTO user_branches (user_id, branch_id)
+//     VALUES (?, ?)
+//   `;
+//   const [result] = await db.query(query, [userId, branchId]);
+//   return result.insertId;
+// };
 
 /*--------------Get Branch By Id-----------*/
 
@@ -341,3 +341,39 @@ export const approveBranchQuery = async (branch_id, approved_by) => {
 
   return result;
 };
+
+
+
+/*===========================================================================
+| GET PROPERTY BY USER ID (admin ki khud ki property)
+===========================================================================*/
+ 
+export async function getPropertyByUserIdQuery(user_id) {
+  const query = `
+    SELECT property_id, user_id, name
+    FROM properties
+    WHERE user_id = ?
+      AND deleted_at IS NULL
+    ORDER BY property_id ASC
+    LIMIT 1
+  `;
+ 
+  const [rows] = await db.query(query, [user_id]);
+ 
+  return rows[0];
+}
+ 
+/*===========================================================================
+| ADD USER BRANCH (after branch creation)
+===========================================================================*/
+ 
+export async function addUserBranchQuery(user_id, branch_id) {
+  const query = `
+    INSERT INTO user_branches (user_id, branch_id)
+    VALUES (?, ?)
+  `;
+ 
+  const [result] = await db.query(query, [user_id, branch_id]);
+ 
+  return result;
+}

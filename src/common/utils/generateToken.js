@@ -8,6 +8,7 @@ const generateToken = (user) => {
       role: user.role,
       manager_id: user.manager_id || null,
       branch_id: user.branch_id || null,
+      property_id: user.property_id || null,
     },
     process.env.JWT_SECRET,
     {
