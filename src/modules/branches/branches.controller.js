@@ -1,63 +1,153 @@
-import * as userBranchService from "./userBranches.service.js";
+import * as branchesService from "./branches.service.js";
 
 import { successResponse, errorResponse } from "../../common/utils/response.js";
+import cloudinary from "../../common/config/cloudinary.js";
 
-/*===========================================================================
-| ASSIGN USER BRANCH
-===========================================================================*/
+/*--------------Create Branch-----------*/
+// export const createBranch = async (req, res) => {
+//   try {
+//     // console.log("BODY =>", req.body);
 
-export async function assignUserBranch(req, res) {
+//     let photoUrls = [];
+
+//     if (req.files && req.files.length > 0) {
+//       photoUrls = await Promise.all(
+//         req.files.map(async (file) => {
+//           const uploadResult = await cloudinary.uploader.upload(file.path, {
+//             folder: "pg_erp/branches",
+//           });
+
+//           return uploadResult.secure_url;
+//         }),
+//       );
+//     }
+
+//     req.body.branch_photos = photoUrls;
+
+//     const data = await branchesService.createBranch(req.body);
+
+//     return successResponse(res, data, "Branch created successfully");
+//   } catch (error) {
+//     console.log(error);
+//     return errorResponse(res, error.message);
+//   }
+// };
+
+//for new flow
+export const createBranch = async (req, res) => {
   try {
-    const result = await userBranchService.assignUserBranch(req.body);
+    let photoUrls = [];
 
-    return successResponse(res, result, "User assigned to branch successfully", 201);
-  } catch (error) {
-    if (error.code === "ER_DUP_ENTRY") {
-      return errorResponse(res, "User already assigned to this branch", 400);
+    if (req.files && req.files.length > 0) {
+      photoUrls = await Promise.all(
+        req.files.map(async (file) => {
+          const uploadResult = await cloudinary.uploader.upload(file.path, {
+            folder: "pg_erp/branches",
+          });
+          return uploadResult.secure_url;
+        }),
+      );
     }
 
-    return errorResponse(res, error.message, error.statusCode || 500);
-  }
-}
+    req.body.branch_photos = photoUrls;
 
-/*===========================================================================
-| GET ALL USER BRANCHES
-===========================================================================*/
+    const data = await branchesService.createBranch(req.body, req.user.user_id);
 
-export async function getAllUserBranches(req, res) {
-  try {
-    const result = await userBranchService.getAllUserBranches();
-
-    return successResponse(res, result, "User branches fetched successfully");
+    return successResponse(res, data, "Branch created successfully");
   } catch (error) {
-    return errorResponse(res, error.message, error.statusCode || 500);
+    console.log(error);
+    return errorResponse(res, error.message);
   }
-}
+};
 
-/*===========================================================================
-| GET USER BRANCHES (single user)
-===========================================================================*/
+/*--------------Get Branches-----------*/
 
-export async function getUserBranches(req, res) {
+export const getBranches = async (req, res) => {
   try {
-    const result = await userBranchService.getUserBranches(req.params.user_id);
+    const data = await branchesService.getBranches(req.query.branch_id);
 
-    return successResponse(res, result, "User branch fetched successfully");
+    return successResponse(res, data, "Branches fetched successfully");
   } catch (error) {
-    return errorResponse(res, error.message, error.statusCode || 500);
+    return errorResponse(res, error.message);
   }
-}
+};
 
-/*===========================================================================
-| DELETE USER BRANCH
-===========================================================================*/
+/*--------------Get Single Branch-----------*/
 
-export async function deleteUserBranch(req, res) {
+export const getSingleBranch = async (req, res) => {
   try {
-    const data = await userBranchService.deleteUserBranch(req.params.user_branch_id);
+    const data = await branchesService.getSingleBranch(req.params.id);
 
-    return successResponse(res, data, "User branch deleted successfully");
+    return successResponse(res, data, "Branch fetched successfully");
   } catch (error) {
-    return errorResponse(res, error.message, error.statusCode || 500);
+    return errorResponse(res, error.message);
   }
-}
+};
+
+/*--------------Update Branch-----------*/
+
+export const updateBranch = async (req, res) => {
+  try {
+    const oldBranch = await branchesService.getSingleBranch(req.params.id);
+
+    let photoUrls = oldBranch.branch_photos || [];
+
+    if (req.files && req.files.length > 0) {
+      photoUrls = await Promise.all(
+        req.files.map(async (file) => {
+          const uploadResult = await cloudinary.uploader.upload(file.path, {
+            folder: "pg_erp/branches",
+          });
+
+          return uploadResult.secure_url;
+        }),
+      );
+    }
+
+    req.body.branch_photos = photoUrls;
+
+    const data = await branchesService.updateBranch(req.params.id, req.body);
+
+    return successResponse(res, data, "Branch updated successfully");
+  } catch (error) {
+    return errorResponse(res, error.message);
+  }
+};
+
+/*--------------Delete Branch-----------*/
+
+export const deleteBranch = async (req, res) => {
+  try {
+    const data = await branchesService.deleteBranch(req.params.id);
+
+    return successResponse(res, data, "Branch deleted successfully");
+  } catch (error) {
+    return errorResponse(res, error.message);
+  }
+};
+
+/*---------Get Branches By Property id-----*/
+
+export const getBranchesByPropertyId = async (req, res) => {
+  try {
+    const { property_id } = req.params;
+
+    const data = await branchesService.getBranchesByPropertyId(property_id);
+
+    return successResponse(res, data, "Branches fetched successfully");
+  } catch (error) {
+    return errorResponse(res, error.message);
+  }
+};
+
+/*--------------Approve Branch-----------*/
+
+export const approveBranch = async (req, res) => {
+  try {
+    const data = await branchesService.approveBranch(req.params.id, req.user);
+
+    return successResponse(res, data, "Branch approved successfully");
+  } catch (error) {
+    return errorResponse(res, error.message);
+  }
+};
