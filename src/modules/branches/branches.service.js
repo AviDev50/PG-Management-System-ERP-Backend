@@ -298,12 +298,18 @@ export async function deleteBranch(branch_id) {
 | GET BRANCHES BY PROPERTY ID
 ===========================================================================*/
 
-export async function getBranchesByPropertyId(property_id) {
-  const branches = await getBranchesByPropertyIdQuery(property_id);
-
+export async function getBranchesByPropertyId(requestingUser) {
+  if (!requestingUser.property_id) {
+    const error = new Error("No property linked to this admin account");
+    error.statusCode = 404;
+    throw error;
+  }
+ 
+  const branches = await getBranchesByPropertyIdQuery(requestingUser.property_id);
+ 
   const active = branches.filter((b) => b.approval_status === "approved");
   const pending = branches.filter((b) => b.approval_status === "pending");
-
+ 
   return {
     active_count: active.length,
     pending_count: pending.length,

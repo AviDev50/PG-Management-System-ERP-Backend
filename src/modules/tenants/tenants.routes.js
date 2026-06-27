@@ -21,15 +21,27 @@ const router = express.Router();
 
 /*--------------Create Tenant-----------*/
 
+// router.post(
+//   "/create",
+//   verifyToken,
+//   allowRoles("admin"),
+//   checkBranchAccess({ source: "body" }),
+//   upload.fields([
+//     { name: "profile_image", maxCount: 1 },
+//     { name: "document_image", maxCount: 2 },
+//   ]),
+//   createTenant,
+// );
+
 router.post(
   "/create",
   verifyToken,
   allowRoles("admin"),
-  checkBranchAccess({ source: "body" }),
   upload.fields([
     { name: "profile_image", maxCount: 1 },
     { name: "document_image", maxCount: 2 },
   ]),
+  checkBranchAccess({ source: "body" }),
   createTenant,
 );
 

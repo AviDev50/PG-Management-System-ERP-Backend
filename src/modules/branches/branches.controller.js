@@ -101,16 +101,13 @@ export const deleteBranch = async (req, res) => {
 
 export const getBranchesByPropertyId = async (req, res) => {
   try {
-    const { property_id } = req.params;
-
-    const data = await branchesService.getBranchesByPropertyId(property_id);
+    const data = await branchesService.getBranchesByPropertyId(req.user);
 
     return successResponse(res, data, "Branches fetched successfully");
   } catch (error) {
-    return errorResponse(res, error.message);
+    return errorResponse(res, error.message, error.statusCode || 500);
   }
 };
-
 /*--------------Approve Branch-----------*/
 
 export const approveBranch = async (req, res) => {
