@@ -32,10 +32,9 @@ router.get("/", verifyToken, getBranches);
 /*--------------Get Branches By Property id-----*/
 
 router.get(
-  "/property/:property_id",
+  "/my-property",
   verifyToken,
   allowRoles("admin"),
-  checkPropertyAccess({ idParam: "property_id" }),
   getBranchesByPropertyId,
 );
 
