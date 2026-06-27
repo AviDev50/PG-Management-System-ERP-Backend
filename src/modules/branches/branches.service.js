@@ -1,171 +1,67 @@
-import {
-  createBranchQuery,
-  getBranchByIdQuery,
-  getBranchesQuery,
-  getSingleBranchQuery,
-  updateBranchQuery,
-  deleteBranchQuery,
-  getBranchesByPropertyIdQuery,
-  approveBranchQuery,
-} from "./branches.model.js";
-import { getSinglePropertyQuery } from "../pg/pg.model.js";
+import * as userBranchModel from "./userBranches.model.js";
 
-/*------------Create Branch-------------*/
+/*===========================================================================
+| ASSIGN USER BRANCH
+===========================================================================*/
 
-// export const createBranch = async (payload) => {
-//   if (typeof payload.ideal_for === "string") {
-//     payload.ideal_for = JSON.parse(payload.ideal_for);
-//   }
+export async function assignUserBranch(payload) {
+  const { user_id, branch_id } = payload;
 
-//   if (typeof payload.amenities === "string") {
-//     payload.amenities = JSON.parse(payload.amenities);
-//   }
-
-//   const branchId = await createBranchQuery(payload);
-
-//   const branch = await getBranchByIdQuery(branchId);
-
-//   return branch;
-// };
-
-//for new flow
- // exact path apne project ke hisaab se confirm kar lena
-
-export const createBranch = async (payload, requestingUserId) => {
-  if (typeof payload.ideal_for === "string") {
-    payload.ideal_for = JSON.parse(payload.ideal_for);
+  if (!user_id || !branch_id) {
+    const error = new Error("user_id and branch_id are required");
+    error.statusCode = 400;
+    throw error;
   }
 
-  if (typeof payload.amenities === "string") {
-    payload.amenities = JSON.parse(payload.amenities);
+  const user = await userBranchModel.getUserByIdQuery(user_id);
+
+  if (!user) {
+    const error = new Error("User not found");
+    error.statusCode = 404;
+    throw error;
   }
 
-  // Ownership verify — ye property requesting admin ki hi hai ya nahi
-  const property = await getSinglePropertyQuery(payload.property_id);
+  const branch = await userBranchModel.getBranchByIdQuery(branch_id);
 
-  if (!property) {
-    throw new Error("Property not found");
+  if (!branch) {
+    const error = new Error("Branch not found");
+    error.statusCode = 404;
+    throw error;
   }
 
-  if (Number(property.user_id) !== Number(requestingUserId)) {
-  throw new Error("You are not authorized to create a branch under this property");
+  return await userBranchModel.assignUserBranchQuery(user_id, branch_id);
 }
 
-  const branchId = await createBranchQuery(payload);
+/*===========================================================================
+| GET ALL USER BRANCHES
+===========================================================================*/
 
-  // user_branches entry — admin ko is naye branch ka access mil gaya
-  await addUserBranchQuery(requestingUserId, branchId);
+export async function getAllUserBranches() {
+  return await userBranchModel.getAllUserBranchesQuery();
+}
 
-  const branch = await getBranchByIdQuery(branchId);
+/*===========================================================================
+| GET USER BRANCHES (single user)
+===========================================================================*/
 
-  return branch;
-};
+export async function getUserBranches(user_id) {
+  return await userBranchModel.getUserBranchesQuery(user_id);
+}
 
-export const addUserBranchQuery = async (userId, branchId) => {
-  const query = `
-    INSERT INTO user_branches (user_id, branch_id)
-    VALUES (?, ?)
-  `;
-  const [result] = await db.query(query, [userId, branchId]);
-  return result.insertId;
-};
+/*===========================================================================
+| DELETE USER BRANCH
+===========================================================================*/
 
-/*--------------Get Branches-----------*/
-export const getBranches = async (branch_id = null) => {
-  let branches = await getBranchesQuery();
+export async function deleteUserBranch(user_branch_id) {
+  const existing = await userBranchModel.getUserBranchByIdQuery(user_branch_id);
 
-  if (branch_id) {
-    branches = branches.filter((b) => b.branch_id == branch_id);
+  if (!existing) {
+    const error = new Error("User branch not found");
+    error.statusCode = 404;
+    throw error;
   }
 
-  const active = branches.filter((b) => b.approval_status === "approved");
+  await userBranchModel.deleteUserBranchQuery(user_branch_id);
 
-  const pending = branches.filter((b) => b.approval_status === "pending");
-
-  return {
-    active_count: active.length,
-    pending_count: pending.length,
-    active,
-    pending,
-  };
-};
-/*--------------Get Single Branch-----------*/
-
-export const getSingleBranch = async (branch_id) => {
-  const branch = await getBranchByIdQuery(branch_id);
-
-  if (!branch) {
-    throw new Error("Branch not found");
-  }
-
-  return branch;
-};
-
-/*--------------Update Branch-----------*/
-
-export const updateBranch = async (branch_id, payload) => {
-  if (typeof payload.ideal_for === "string") {
-    payload.ideal_for = JSON.parse(payload.ideal_for);
-  }
-
-  if (typeof payload.amenities === "string") {
-    payload.amenities = JSON.parse(payload.amenities);
-  }
-
-  const branch = await getBranchByIdQuery(branch_id);
-
-  if (!branch) {
-    throw new Error("Branch not found");
-  }
-
-  await updateBranchQuery(payload, branch_id);
-
-  return await getBranchByIdQuery(branch_id);
-};
-
-/*--------------Delete Branch-----------*/
-
-export const deleteBranch = async (branch_id) => {
-  const branch = await getBranchByIdQuery(branch_id);
-
-  if (!branch) {
-    throw new Error("Branch not found");
-  }
-
-  await deleteBranchQuery(branch_id);
-
-  return {
-    success: true,
-  };
-};
-
-/*---------Get Branches By Property id-----*/
-
-export const getBranchesByPropertyId = async (property_id) => {
-  const branches = await getBranchesByPropertyIdQuery(property_id);
-
-  const active = branches.filter((b) => b.approval_status === "approved");
-
-  const pending = branches.filter((b) => b.approval_status === "pending");
-
-  return {
-    active_count: active.length,
-    pending_count: pending.length,
-    active,
-    pending,
-  };
-};
-
-/*--------------Approve Branch-----------*/
-
-export const approveBranch = async (branch_id, user) => {
-  const branch = await getBranchByIdQuery(branch_id);
-
-  if (!branch) {
-    throw new Error("Branch not found");
-  }
-
-  await approveBranchQuery(branch_id, user.user_id);
-
-  return await getBranchByIdQuery(branch_id);
-};
+  return existing;
+}
