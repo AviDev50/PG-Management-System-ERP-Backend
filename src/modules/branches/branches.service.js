@@ -185,6 +185,7 @@ import {
 ===========================================================================*/
 
 export async function createBranch(payload, requestingUser) {
+  console.log(requestingUser);
   if (typeof payload.ideal_for === "string") {
     payload.ideal_for = JSON.parse(payload.ideal_for);
   }
@@ -203,6 +204,7 @@ export async function createBranch(payload, requestingUser) {
   payload.property_id = requestingUser.property_id;
 
   const branchId = await createBranchQuery(payload);
+  
 
   // user_branches entry - admin ko is naye branch ka access mil gaya
   await addUserBranchQuery(requestingUser.user_id, branchId);

@@ -6,6 +6,9 @@ import {
   deleteCategory,
   updateCategory,
 } from "./complaintCategory.controller.js";
+
+import { verifyToken } from "../../common/middlewares/auth.middleware.js";
+import { allowRoles } from "../../common/middlewares/role.middleware.js";
 import { checkBranchAccess } from "../../common/middlewares/checkBranchAccess.middleware.js";
 
 const router = express.Router();
@@ -14,24 +17,57 @@ const router = express.Router();
 | CREATE CATEGORY
 ===========================================================================*/
 
-router.post("/", createCategory);
+router.post(
+  "/",
+  verifyToken,
+  allowRoles("admin", "branch_manager"),
+  checkBranchAccess({ source: "body" }),
+  createCategory,
+);
 
 /*===========================================================================
-| GET ALL CATEGORIES
+| GET ALL CATEGORIES (role-scoped inside service)
 ===========================================================================*/
 
-router.get("/", getCategories);
-
-/*===========================================================================
-| DELETE CATEGORY
-===========================================================================*/
-
-router.delete("/:id", deleteCategory);
+router.get(
+  "/",
+  verifyToken,
+  allowRoles("super_admin", "admin", "branch_manager"),
+  getCategories,
+);
 
 /*===========================================================================
 | UPDATE CATEGORY
 ===========================================================================*/
 
-router.put("/:id", updateCategory);
+router.put(
+  "/:id",
+  verifyToken,
+  allowRoles("admin", "branch_manager"),
+  checkBranchAccess({
+    source: "params",
+    table: "complaint_categories",
+    idParam: "id",
+    idColumn: "category_id",
+  }),
+  updateCategory,
+);
+
+/*===========================================================================
+| DELETE CATEGORY
+===========================================================================*/
+
+router.delete(
+  "/:id",
+  verifyToken,
+  allowRoles("admin", "branch_manager"),
+  checkBranchAccess({
+    source: "params",
+    table: "complaint_categories",
+    idParam: "id",
+    idColumn: "category_id",
+  }),
+  deleteCategory,
+);
 
 export default router;
