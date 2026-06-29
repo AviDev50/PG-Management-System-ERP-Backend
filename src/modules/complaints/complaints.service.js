@@ -4,14 +4,51 @@ import * as complaintModel from "./complaints.model.js";
 | CREATE COMPLAINT
 ===========================================================================*/
 
+// export async function createComplaint(payload, user) {
+//   const { title, description, category_id } = payload;
+
+//   const tenant_id = user.tenant_id;
+
+//   /*--------------------------------------------------
+//   | CHECK TENANT
+//   --------------------------------------------------*/
+
+//   const tenant = await complaintModel.getTenantById(tenant_id);
+
+//   if (!tenant) {
+//     throw new Error("Tenant not found");
+//   }
+
+//   if (!tenant.room_id) {
+//     throw new Error("Tenant is not assigned to any room");
+//   }
+
+//   /*--------------------------------------------------
+//   | CREATE COMPLAINT (status defaults to 'open' via DB)
+//   --------------------------------------------------*/
+
+//   const result = await complaintModel.createComplaintQuery({
+//     tenant_id,
+//     branch_id: tenant.branch_id,
+//     room_id: tenant.room_id,
+//     title,
+//     description,
+//     category_id,
+//   });
+
+//   /*--------------------------------------------------
+//   | FETCH CREATED COMPLAINT
+//   --------------------------------------------------*/
+
+//   const complaint = await complaintModel.getComplaintById(result.insertId);
+
+//   return complaint;
+// }
+
 export async function createComplaint(payload, user) {
   const { title, description, category_id } = payload;
 
   const tenant_id = user.tenant_id;
-
-  /*--------------------------------------------------
-  | CHECK TENANT
-  --------------------------------------------------*/
 
   const tenant = await complaintModel.getTenantById(tenant_id);
 
@@ -23,9 +60,11 @@ export async function createComplaint(payload, user) {
     throw new Error("Tenant is not assigned to any room");
   }
 
-  /*--------------------------------------------------
-  | CREATE COMPLAINT (status defaults to 'open' via DB)
-  --------------------------------------------------*/
+  if (!category_id) {
+    const error = new Error("category_id is required");
+    error.statusCode = 400;
+    throw error;
+  }
 
   const result = await complaintModel.createComplaintQuery({
     tenant_id,
@@ -35,10 +74,6 @@ export async function createComplaint(payload, user) {
     description,
     category_id,
   });
-
-  /*--------------------------------------------------
-  | FETCH CREATED COMPLAINT
-  --------------------------------------------------*/
 
   const complaint = await complaintModel.getComplaintById(result.insertId);
 

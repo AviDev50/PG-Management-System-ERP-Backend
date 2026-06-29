@@ -1,59 +1,62 @@
 import * as categoryService from "./complaintCategory.service.js";
-
 import { successResponse, errorResponse } from "../../common/utils/response.js";
 
 /*===========================================================================
 | CREATE CATEGORY
 ===========================================================================*/
 
-export const createCategory = async (req, res) => {
+export async function createCategory(req, res) {
   try {
     const data = await categoryService.createCategory(req.body);
 
     return successResponse(res, data, "Category created successfully");
   } catch (error) {
-    return errorResponse(res, error.message);
+    if (error.code === "ER_DUP_ENTRY") {
+      return errorResponse(res, "Category already exists", 400);
+    }
+
+    return errorResponse(res, error.message, error.statusCode || 500);
   }
-};
+}
 
 /*===========================================================================
 | GET ALL CATEGORIES
 ===========================================================================*/
 
-export const getCategories = async (req, res) => {
+export async function getCategories(req, res) {
   try {
-    const data = await categoryService.getCategories();
+    const data = await categoryService.getCategories(req.user);
 
     return successResponse(res, data, "Categories fetched successfully");
   } catch (error) {
-    return errorResponse(res, error.message);
+    return errorResponse(res, error.message, error.statusCode || 500);
   }
-};
-
-/*===========================================================================
-| DELETE CATEGORY
-===========================================================================*/
-
-export const deleteCategory = async (req, res) => {
-  try {
-    const data = await categoryService.deleteCategory(req.params.id);
-
-    return successResponse(res, data, "Category deleted successfully");
-  } catch (error) {
-    return errorResponse(res, error.message);
-  }
-};
+}
 
 /*===========================================================================
 | UPDATE CATEGORY
 ===========================================================================*/
 
-export const updateCategory = async (req, res) => {
+export async function updateCategory(req, res) {
   try {
     const data = await categoryService.updateCategory(req.params.id, req.body);
 
     return successResponse(res, data, "Category updated successfully");
   } catch (error) {
-    return errorResponse(res, error.message);
+    return errorResponse(res, error.message, error.statusCode || 500);
   }
-};
+}
+
+/*===========================================================================
+| DELETE CATEGORY
+===========================================================================*/
+
+export async function deleteCategory(req, res) {
+  try {
+    const data = await categoryService.deleteCategory(req.params.id);
+
+    return successResponse(res, data, "Category deleted successfully");
+  } catch (error) {
+    return errorResponse(res, error.message, error.statusCode || 500);
+  }
+}
