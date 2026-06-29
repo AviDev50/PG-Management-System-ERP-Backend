@@ -43,6 +43,14 @@ export async function getCategories(user) {
 }
 
 /*===========================================================================
+| GET CATEGORIES (TENANT SIDE - own branch only)
+===========================================================================*/
+
+export async function getCategoriesTenantSide(branch_id) {
+  return await categoryModel.getCategoriesByBranchQuery(branch_id);
+}
+
+/*===========================================================================
 | UPDATE CATEGORY
 ===========================================================================*/
 
