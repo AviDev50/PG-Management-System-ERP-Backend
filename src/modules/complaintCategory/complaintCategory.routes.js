@@ -3,11 +3,13 @@ import express from "express";
 import {
   createCategory,
   getCategories,
+  getCategoriesTenantSide,
   deleteCategory,
   updateCategory,
 } from "./complaintCategory.controller.js";
 
 import { verifyToken } from "../../common/middlewares/auth.middleware.js";
+import { verifyTenantToken } from "../../common/middlewares/tenantAuth.middleware.js";
 import { allowRoles } from "../../common/middlewares/role.middleware.js";
 import { checkBranchAccess } from "../../common/middlewares/checkBranchAccess.middleware.js";
 
@@ -24,6 +26,12 @@ router.post(
   checkBranchAccess({ source: "body" }),
   createCategory,
 );
+
+/*===========================================================================
+| GET CATEGORIES (TENANT SIDE - own branch only)
+===========================================================================*/
+
+router.get("/tenant", verifyTenantToken, getCategoriesTenantSide);
 
 /*===========================================================================
 | GET ALL CATEGORIES (role-scoped inside service)

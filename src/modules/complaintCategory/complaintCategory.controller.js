@@ -34,6 +34,20 @@ export async function getCategories(req, res) {
 }
 
 /*===========================================================================
+| GET CATEGORIES (TENANT SIDE)
+===========================================================================*/
+
+export async function getCategoriesTenantSide(req, res) {
+  try {
+    const data = await categoryService.getCategoriesTenantSide(req.user.branch_id);
+
+    return successResponse(res, data, "Categories fetched successfully");
+  } catch (error) {
+    return errorResponse(res, error.message, error.statusCode || 500);
+  }
+}
+
+/*===========================================================================
 | UPDATE CATEGORY
 ===========================================================================*/
 
