@@ -9,7 +9,7 @@ import {
 } from "./complaintCategory.controller.js";
 
 import { verifyToken } from "../../common/middlewares/auth.middleware.js";
-import { verifyTenantToken } from "../../common/middlewares/tenantAuth.middleware.js";
+import { verifyTenantToken } from "../../common/middlewares/tenantauth.middleware.js";
 import { allowRoles } from "../../common/middlewares/role.middleware.js";
 import { checkBranchAccess } from "../../common/middlewares/checkBranchAccess.middleware.js";
 

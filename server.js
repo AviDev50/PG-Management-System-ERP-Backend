@@ -22,9 +22,10 @@ import dashboardRoutes from "./src/modules/dashboard/dashboard.routes.js";
 import managersRoutes from "./src/modules/managers/managers.routes.js";
 import mealPlansRoutes from "./src/modules/meal_plans/mealPlans.routes.js";
 import reportsRoutes from "./src/modules/reports/reports.routes.js";
-import notificationRoutes from "./src/modules/notifications/notifications.routes.js";
+import notificationRoutes from "./src/modules/notifications/notification.routes.js";
 import complaintCategoryRoutes from "./src/modules/complaintCategory/complaintCategory.routes.js";
 import tenantAuthRoutes from "./src/modules/tenant-auth/tenantAuth.route.js";
+import deviceToken from "./src/modules/device_tokens/deviceToken.routes.js"
 
 const app = express();
 
@@ -58,6 +59,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/complaint-categories", complaintCategoryRoutes);
 app.use("/api/auth", authRoutes);           // staff login
 app.use("/api/tenant-auth", tenantAuthRoutes); // tenant login
+app.use("/api/device-tokens", deviceToken);
 
 /*------------ 404 Handler ------------------*/
 app.use((req, res) => {
