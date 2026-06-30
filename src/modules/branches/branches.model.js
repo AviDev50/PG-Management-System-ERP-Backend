@@ -108,7 +108,8 @@ export const getBranchByIdQuery = async (branch_id) => {
   const query = `
 SELECT
   b.*,
-  COUNT(DISTINCT r.room_id) AS total_rooms,
+
+  (SELECT COUNT(*) FROM rooms r WHERE r.branch_id = b.branch_id) AS total_rooms,
 
   m.manager_id,
   m.phone AS manager_phone,
@@ -122,9 +123,6 @@ SELECT
 
 FROM branches b
 
-LEFT JOIN rooms r
-  ON r.branch_id = b.branch_id
-
 LEFT JOIN managers m
   ON m.branch_id = b.branch_id
   AND m.is_active = 1
@@ -134,8 +132,6 @@ LEFT JOIN users u
   ON u.user_id = m.user_id
 
 WHERE b.branch_id = ?
-
-GROUP BY b.branch_id
 `;
 
   const [results] = await db.query(query, [branch_id]);
