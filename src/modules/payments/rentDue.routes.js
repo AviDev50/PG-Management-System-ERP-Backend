@@ -8,7 +8,7 @@ import { allowRoles } from "../../common/middlewares/role.middleware.js";
 const router = express.Router();
 
 router.use(verifyToken);
-router.use(allowRoles(["admin", "branch_manager"]));
+router.use(allowRoles("admin", "branch_manager"));   // ✅ spread arguments, array nahi
 
 router.get(
   "/",
