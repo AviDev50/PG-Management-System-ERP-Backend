@@ -66,7 +66,8 @@ export async function getComplaintByBranchId(req, res) {
   try {
     const { branch_id } = req.params;
 
-    const complaints = await complaintsService.getComplaintByBranchId(branch_id);
+    const complaints =
+      await complaintsService.getComplaintByBranchId(branch_id);
 
     return successResponse(
       res,

@@ -119,3 +119,8 @@ export async function deleteMyNotification({ notificationId, role, userId, tenan
   const recipientId = role === "tenant" ? tenantId : userId;
   return await notificationModel.deleteNotificationQuery(notificationId, recipientType, recipientId);
 }
+
+export async function getSentNotifications({ senderUserId, page, limit }) {
+  const offset = (page - 1) * limit;
+  return await notificationModel.getSentNotificationBatchesQuery(senderUserId, limit, offset);
+}

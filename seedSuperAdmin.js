@@ -6,7 +6,7 @@ async function seedSuperAdmin() {
     // Check if Super Admin already exists
     const [existingUser] = await db.query(
       "SELECT user_id FROM users WHERE email = ?",
-      ["superadmin@gmail.com"]
+      ["superadmin@gmail.com"],
     );
 
     if (existingUser.length > 0) {
@@ -26,13 +26,7 @@ async function seedSuperAdmin() {
         password_hash,
         is_active
       ) VALUES (?, ?, ?, ?, ?)`,
-      [
-        1,
-        "Super Admin",
-        "superadmin@gmail.com",
-        passwordHash,
-        1,
-      ]
+      [1, "Super Admin", "superadmin@gmail.com", passwordHash, 1],
     );
 
     console.log("✅ Super Admin created successfully.");

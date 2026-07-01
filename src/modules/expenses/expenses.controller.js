@@ -57,25 +57,22 @@ export const deleteExpenseCategory = async (req, res) => {
   }
 };
 
-
 //===========get expense category by branch id
 export const getExpenseCategoriesByBranch = async (req, res) => {
   try {
-    const data =
-      await expensesService.getExpenseCategoriesByBranch(
-        req.params.branch_id
-      );
+    const data = await expensesService.getExpenseCategoriesByBranch(
+      req.params.branch_id,
+    );
 
     return successResponse(
       res,
       data,
-      "Expense categories fetched successfully"
+      "Expense categories fetched successfully",
     );
   } catch (error) {
     return errorResponse(res, error.message);
   }
 };
-
 
 /*--------------Create Expense-----------*/
 

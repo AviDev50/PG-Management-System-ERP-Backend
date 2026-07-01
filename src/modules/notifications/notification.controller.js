@@ -81,3 +81,20 @@ export async function deleteMyNotification(req, res) {
     return res.status(500).json({ success: false, message: err.message });
   }
 }
+
+export async function getSentNotifications(req, res) {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+
+    const data = await notificationService.getSentNotifications({
+      senderUserId: req.user.user_id,
+      page,
+      limit,
+    });
+
+    return res.status(200).json({ success: true, data, page, limit });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+}

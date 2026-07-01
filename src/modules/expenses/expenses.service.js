@@ -11,7 +11,7 @@ import {
   getExpensesByBranchQuery,
   updateExpenseQuery,
   deleteExpenseQuery,
-  getExpenseCategoriesByBranchQuery
+  getExpenseCategoriesByBranchQuery,
 } from "./expenses.model.js";
 
 /*--------------Create Expense Category-----------*/
@@ -68,16 +68,13 @@ export const deleteExpenseCategory = async (expense_category_id) => {
   return category;
 };
 
-
-
 /*-----------Get expense category by branch id-------*/
 export const getExpenseCategoriesByBranch = async (branch_id) => {
   if (!branch_id) {
     throw new Error("Branch id is required");
   }
 
-  const categories =
-    await getExpenseCategoriesByBranchQuery(branch_id);
+  const categories = await getExpenseCategoriesByBranchQuery(branch_id);
 
   return {
     total_categories: categories.length,

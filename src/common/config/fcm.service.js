@@ -2,12 +2,13 @@
 import { messaging } from "../config/firebase.js";
 
 export async function sendPushToTokens(tokens, title, body, data = {}) {
-  if (!tokens || tokens.length === 0) return { successCount: 0, failureCount: 0 };
+  if (!tokens || tokens.length === 0)
+    return { successCount: 0, failureCount: 0 };
 
   const message = {
     notification: { title, body },
     data: Object.fromEntries(
-      Object.entries(data).map(([k, v]) => [k, String(v)])
+      Object.entries(data).map(([k, v]) => [k, String(v)]),
     ),
     tokens,
   };
