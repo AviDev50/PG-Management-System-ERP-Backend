@@ -11,7 +11,7 @@ import branchesRoutes from "./src/modules/branches/branches.routes.js";
 import roomsRoutes from "./src/modules/rooms/rooms.routes.js";
 import bedsRoutes from "./src/modules/beds/bed.routes.js";
 import tenantsRoutes from "./src/modules/tenants/tenants.routes.js";
-import paymentsRoutes from "./src/modules/payments/payments.routes.js";
+import paymentsRoutes from "./src/modules/payments/rentDue.routes.js";
 import expensesRoutes from "./src/modules/expenses/expenses.routes.js";
 import complaintsRoutes from "./src/modules/complaints/complaints.routes.js";
 import transfersRoutes from "./src/modules/transfers/transfers.routes.js";
@@ -26,6 +26,8 @@ import notificationRoutes from "./src/modules/notifications/notification.routes.
 import complaintCategoryRoutes from "./src/modules/complaintCategory/complaintCategory.routes.js";
 import tenantAuthRoutes from "./src/modules/tenant-auth/tenantAuth.route.js";
 import deviceToken from "./src/modules/device_tokens/deviceToken.routes.js"
+import { startRentDueCron } from "./src/modules/payments/rentDueCron.js";
+startRentDueCron();
 
 const app = express();
 
@@ -44,7 +46,7 @@ app.use("/api/branches", branchesRoutes);
 app.use("/api/rooms", roomsRoutes);
 app.use("/api/beds", bedsRoutes);
 app.use("/api/tenants", tenantsRoutes);
-app.use("/api/payments", paymentsRoutes);
+app.use("/api/rent-dues", paymentsRoutes);
 app.use("/api/expenses", expensesRoutes);
 app.use("/api/complaints", complaintsRoutes);
 app.use("/api/transfers", transfersRoutes);
