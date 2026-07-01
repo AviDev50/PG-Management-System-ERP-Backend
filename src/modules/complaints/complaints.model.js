@@ -66,8 +66,15 @@ export async function getComplaintsQuery() {
       c.title,
       c.description,
       c.status,
-      c.created_at,
-      c.updated_at,
+    DATE_FORMAT(
+        c.created_at,
+        '%d-%m-%y'
+      ) AS created_at,
+
+      DATE_FORMAT(
+        c.updated_at,
+        '%d-%m-%y'
+      ) AS updated_at,
 
       CONCAT(
         t.first_name,
@@ -119,8 +126,15 @@ export async function getComplaintsByTenantQuery(tenant_id) {
       c.title,
       c.description,
       c.status,
-      c.created_at,
-      c.updated_at,
+   DATE_FORMAT(
+        c.created_at,
+        '%d-%m-%y'
+      ) AS created_at,
+
+      DATE_FORMAT(
+        c.updated_at,
+        '%d-%m-%y'
+      ) AS updated_at,
 
       CONCAT(
         t.first_name,
@@ -173,8 +187,15 @@ export async function getComplaintById(complaint_id) {
       c.title,
       c.description,
       c.status,
-      c.created_at,
-      c.updated_at,
+      DATE_FORMAT(
+        c.created_at,
+        '%d-%m-%y'
+      ) AS created_at,
+
+      DATE_FORMAT(
+        c.updated_at,
+        '%d-%m-%y'
+      ) AS updated_at,
 
       CONCAT(
         t.first_name,
@@ -257,7 +278,10 @@ export async function getComplaintsByBranchQuery(branch_id) {
       c.title,
       c.description,
       c.status,
-      c.created_at,
+    DATE_FORMAT(
+        c.created_at,
+        '%d-%m-%y'
+      ) AS created_at,
 
       t.tenant_id,
       CONCAT(

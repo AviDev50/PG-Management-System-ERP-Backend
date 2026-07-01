@@ -118,3 +118,57 @@ export async function deleteNotificationQuery(notificationId, recipientType, rec
   );
   return result;
 }
+
+export async function getSentNotificationBatchesQuery(senderUserId, limit, offset) {
+  const [rows] = await db.execute(
+    `SELECT 
+      nb.batch_id,
+      nb.target_type,
+      nb.scope,
+      nb.branch_id,
+      nb.title,
+      nb.message,
+      nb.recipient_count,
+      nb.created_at,
+      b.name AS branch_name
+     FROM notification_batches nb
+     LEFT JOIN branches b ON b.branch_id = nb.branch_id
+     WHERE nb.sender_user_id = ?
+     ORDER BY nb.created_at DESC
+     LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
+    [senderUserId]  // sirf senderUserId placeholder mein, LIMIT/OFFSET interpolated
+  );
+  return rows;
+}
+
+
+
+
+
+
+
+
+//add when needed
+
+
+// export async function getNotificationsForStaffQuery(userId, limit, offset) {
+//   const [rows] = await db.execute(
+//     `SELECT * FROM notifications 
+//      WHERE recipient_type = 'staff' AND user_id = ?
+//      ORDER BY created_at DESC
+//      LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
+//     [userId]
+//   );
+//   return rows;
+// }
+
+// export async function getNotificationsForTenantQuery(tenantId, limit, offset) {
+//   const [rows] = await db.execute(
+//     `SELECT * FROM notifications 
+//      WHERE recipient_type = 'tenant' AND tenant_id = ?
+//      ORDER BY created_at DESC
+//      LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
+//     [tenantId]
+//   );
+//   return rows;
+// }

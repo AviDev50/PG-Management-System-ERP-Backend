@@ -5,7 +5,7 @@ import db from "../../common/config/db.js";
 export const createExpenseCategoryQuery = async (
   branch_id,
   name,
-  description
+  description,
 ) => {
   const query = `
     INSERT INTO expense_categories
@@ -97,7 +97,6 @@ export const deleteExpenseCategoryQuery = async (expense_category_id) => {
   return result;
 };
 
-
 /*-------------Get expense category by branch id -----------*/
 export const getExpenseCategoriesByBranchQuery = async (branch_id) => {
   const query = `
@@ -118,8 +117,6 @@ export const getExpenseCategoriesByBranchQuery = async (branch_id) => {
 
   return results;
 };
-
-
 
 /*--------------Check Branch Ownership-----------*/
 
@@ -173,9 +170,6 @@ export const createExpenseQuery = async (data) => {
   return result;
 };
 
-
-
-
 /*--------------Get Expenses-----------*/
 
 export const getExpensesQuery = async (user_id) => {
@@ -212,14 +206,9 @@ export const getExpensesQuery = async (user_id) => {
   return results;
 };
 
-
-
-
 /*--------------Get Expenses By Branch-----------*/
 
-export const getExpensesByBranchQuery = async (
-  branch_id
-) => {
+export const getExpensesByBranchQuery = async (branch_id) => {
   const query = `
     SELECT
       expenses.expense_id,
@@ -230,43 +219,44 @@ export const getExpensesByBranchQuery = async (
 
       DATE_FORMAT(
         expenses.expense_date,
-        '%Y-%m-%d'
+        '%d-%m-%y'
       ) AS expense_date,
 
       expenses.description,
       expenses.receipt_url,
-      expenses.created_at,
-      expenses.updated_at,
 
-      expense_categories.name
-      AS expense_category_name
+      DATE_FORMAT(
+        expenses.created_at,
+        '%d-%m-%y'
+      ) AS created_at,
+
+      DATE_FORMAT(
+        expenses.updated_at,
+        '%d-%m-%y'
+      ) AS updated_at,
+
+      expense_categories.name AS expense_category_name
 
     FROM expenses
 
     JOIN expense_categories
-    ON expense_categories.expense_category_id =
-    expenses.expense_category_id
+      ON expense_categories.expense_category_id =
+         expenses.expense_category_id
 
     WHERE expenses.branch_id = ?
-    AND expenses.deleted_at IS NULL
+      AND expenses.deleted_at IS NULL
 
     ORDER BY expenses.expense_id DESC
   `;
 
-  const [results] = await db.query(query, [
-    branch_id,
-  ]);
+  const [results] = await db.query(query, [branch_id]);
 
   return results;
 };
 
-
-
 /*--------------Get Expense By ID-----------*/
 
-export const getExpenseByIdQuery = async (
-  expense_id
-) => {
+export const getExpenseByIdQuery = async (expense_id) => {
   const query = `
     SELECT *
     FROM expenses
@@ -275,21 +265,14 @@ export const getExpenseByIdQuery = async (
     LIMIT 1
   `;
 
-  const [result] = await db.query(query, [
-    expense_id,
-  ]);
+  const [result] = await db.query(query, [expense_id]);
 
   return result[0];
 };
 
-
-
 /*--------------Update Expense-----------*/
 
-export const updateExpenseQuery = async (
-  expense_id,
-  data
-) => {
+export const updateExpenseQuery = async (expense_id, data) => {
   const query = `
     UPDATE expenses
     SET
@@ -317,12 +300,9 @@ export const updateExpenseQuery = async (
   return result;
 };
 
-
 /*--------------Delete Expense-----------*/
 
-export const deleteExpenseQuery = async (
-  expense_id
-) => {
+export const deleteExpenseQuery = async (expense_id) => {
   const query = `
     UPDATE expenses
     SET
@@ -332,9 +312,7 @@ export const deleteExpenseQuery = async (
     WHERE expense_id = ?
   `;
 
-  const [result] = await db.query(query, [
-    expense_id,
-  ]);
+  const [result] = await db.query(query, [expense_id]);
 
   return result;
 };

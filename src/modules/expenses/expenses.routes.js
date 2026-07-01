@@ -12,8 +12,7 @@ import {
   updateExpense,
   deleteExpense,
 } from "./expenses.controller.js";
-import {checkBranchAccess} from "../../common/middlewares/checkBranchAccess.middleware.js";
-
+import { checkBranchAccess } from "../../common/middlewares/checkBranchAccess.middleware.js";
 
 import { verifyToken } from "../../common/middlewares/auth.middleware.js";
 

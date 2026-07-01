@@ -27,4 +27,12 @@ router.get("/tenant/my", verifyTenantToken, notificationController.getMyNotifica
 router.patch("/tenant/my/:id/read", verifyTenantToken, notificationController.markNotificationAsRead);
 router.delete("/tenant/my/:id", verifyTenantToken, notificationController.deleteMyNotification);
 
+// Staff sent notifications (admin + branch_manager only)
+router.get(
+  "/sent",
+  verifyToken,
+  allowRoles("admin", "branch_manager"),
+  notificationController.getSentNotifications
+);
+
 export default router;
