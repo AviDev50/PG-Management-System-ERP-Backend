@@ -181,22 +181,51 @@ export async function createTenant(payload) {
   try {
     await connection.beginTransaction();
 
-    const [tenantResult] = await connection.execute(
-      `INSERT INTO tenants 
-        (bed_id, branch_id, room_id, room_number, first_name, last_name, profile_image,
-         phone, email, password_hash, gender, dob, marital_status, profession,
-         document_image, address, state, district, pincode, college_name,
-         registration_date, accommodation_date, father_name, father_contact, father_occupation,
-         mother_name, mother_contact, mother_occupation, guardian_name, guardian_relation,
-         guardian_contact, security_deposit, emergency_contact)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [bed_id, branch_id, room_id, room_number, first_name, last_name, profile_image,
-       phone, email, hashedPassword, gender, dob, marital_status, profession,
-       document_image, address, state, district, pincode, college_name,
-       registration_date, accommodation_date, father_name, father_contact, father_occupation,
-       mother_name, mother_contact, mother_occupation, guardian_name, guardian_relation,
-       guardian_contact, security_deposit, emergency_contact]
-    );
+ const [tenantResult] = await connection.execute(
+  `INSERT INTO tenants 
+    (bed_id, branch_id, room_id, room_number, first_name, last_name, profile_image,
+     phone, email, password_hash, gender, dob, marital_status, profession,
+     document_image, address, state, district, pincode, college_name,
+     registration_date, accommodation_date, father_name, father_contact, father_occupation,
+     mother_name, mother_contact, mother_occupation, guardian_name, guardian_relation,
+     guardian_contact, security_deposit, emergency_contact)
+   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  [
+    bed_id,
+    branch_id,
+    room_id,
+    room_number ?? null,
+    first_name,
+    last_name,
+    profile_image ?? null,
+    phone,
+    email ?? null,
+    hashedPassword ?? null,
+    gender ?? null,
+    dob ?? null,
+    marital_status ?? null,
+    profession ?? null,
+    document_image ?? null,
+    address ?? null,
+    state ?? null,
+    district ?? null,
+    pincode ?? null,
+    college_name ?? null,
+    registration_date ?? null,
+    accommodation_date ?? null,
+    father_name ?? null,
+    father_contact ?? null,
+    father_occupation ?? null,
+    mother_name ?? null,
+    mother_contact ?? null,
+    mother_occupation ?? null,
+    guardian_name ?? null,
+    guardian_relation ?? null,
+    guardian_contact ?? null,
+    security_deposit ?? 0,
+    emergency_contact ?? null,
+  ]
+);
 
     const tenant_id = tenantResult.insertId;
 
