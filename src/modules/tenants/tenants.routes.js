@@ -132,4 +132,5 @@ router.delete(
   deleteTenant,
 );
 
+
 export default router;
