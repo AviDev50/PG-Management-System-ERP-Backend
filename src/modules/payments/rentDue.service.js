@@ -89,10 +89,25 @@ export async function generateMonthlyDuesForAllTenants() {
 
 // Admin/Manager — list rent dues within their accessible branches
 export async function getRentDuesForUser(user, filters, limit, offset) {
-  const branchIds = await resolveAccessibleBranchIds(user);
-  if (branchIds.length === 0) return [];
+  const accessibleBranchIds = await resolveAccessibleBranchIds(user);
 
-  return rentDueModel.listRentDuesByBranches(branchIds, filters, limit, offset);
+  if (accessibleBranchIds.length === 0) {
+    return [];
+  }
+
+  let branchIdsToQuery = accessibleBranchIds;
+
+  if (filters.branch_id) {
+    const requestedBranchId = Number(filters.branch_id);
+
+    if (!accessibleBranchIds.includes(requestedBranchId)) {
+      throw { status: 403, message: "You do not have access to this branch" };
+    }
+
+    branchIdsToQuery = [requestedBranchId];
+  }
+
+  return rentDueModel.listRentDuesByBranches(branchIdsToQuery, filters, limit, offset);
 }
 
 // Admin/Manager — list rent dues for a specific tenant (with branch ownership check)

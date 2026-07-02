@@ -8,13 +8,13 @@ export async function listRentDues(req, res) {
   }
 
   try {
-    const { status, billing_month, page = 1, pageSize = 20 } = req.query;
+    const { branch_id, status, billing_month, page = 1, pageSize = 20 } = req.query;
     const limit = Number(pageSize);
     const offset = (Number(page) - 1) * limit;
 
     const dues = await rentDueService.getRentDuesForUser(
       req.user,
-      { status, billing_month },
+      { branch_id, status, billing_month },
       limit,
       offset
     );
