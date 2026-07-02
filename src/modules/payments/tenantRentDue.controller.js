@@ -1,4 +1,4 @@
-import * as rentDueService from "../services/rentDue.service.js";
+import * as rentDueService from "../payments/rentDue.service.js";
 
 export async function getMyRentDues(req, res) {
   try {
