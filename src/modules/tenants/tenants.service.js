@@ -1,56 +1,149 @@
 import bcrypt from "bcryptjs";
 import * as tenantModel from "./tenants.model.js";
 
+function toBillingMonth(date) {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+}
 /*===========================================================================
 | CREATE TENANT
 ===========================================================================*/
 
+//old
+// export async function createTenant(payload) {
+//   const {
+//     bed_id,
+//     branch_id,
+//     room_id,
+//     room_number,
+
+//     first_name,
+//     last_name,
+//     profile_image,
+
+//     phone,
+//     email,
+//     password,
+
+//     gender,
+//     dob,
+//     marital_status,
+//     profession,
+
+//     document_image,
+
+//     address,
+//     state,
+//     district,
+//     pincode,
+
+//     college_name,
+
+//     registration_date,
+//     accommodation_date,
+
+//     father_name,
+//     father_contact,
+//     father_occupation,
+
+//     mother_name,
+//     mother_contact,
+//     mother_occupation,
+
+//     guardian_name,
+//     guardian_relation,
+//     guardian_contact,
+
+//     security_deposit,
+//     emergency_contact,
+//   } = payload;
+
+//   if (!bed_id || !branch_id || !room_id || !first_name || !last_name || !phone) {
+//     const error = new Error("bed_id, branch_id, room_id, first_name, last_name and phone are required");
+//     error.statusCode = 400;
+//     throw error;
+//   }
+
+//   const bed = await tenantModel.getBedByIdQuery(bed_id);
+
+//   if (!bed) {
+//     const error = new Error("Bed not found");
+//     error.statusCode = 404;
+//     throw error;
+//   }
+
+//   if (bed.status === "occupied") {
+//     const error = new Error("Bed already occupied");
+//     error.statusCode = 400;
+//     throw error;
+//   }
+
+//   const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+
+//   const result = await tenantModel.createTenantQuery({
+//     bed_id,
+//     branch_id,
+//     room_id,
+//     room_number,
+
+//     first_name,
+//     last_name,
+//     profile_image,
+
+//     phone,
+//     email,
+//     password_hash: hashedPassword,
+
+//     gender,
+//     dob,
+//     marital_status,
+//     profession,
+
+//     document_image,
+
+//     address,
+//     state,
+//     district,
+//     pincode,
+
+//     college_name,
+
+//     registration_date,
+//     accommodation_date,
+
+//     father_name,
+//     father_contact,
+//     father_occupation,
+
+//     mother_name,
+//     mother_contact,
+//     mother_occupation,
+
+//     guardian_name,
+//     guardian_relation,
+//     guardian_contact,
+
+//     security_deposit,
+//     emergency_contact,
+//   });
+
+//   await tenantModel.updateBedStatusQuery(bed_id, "occupied");
+
+//   return await tenantModel.getTenantByIdQuery(result.insertId);
+// }
+
 export async function createTenant(payload) {
   const {
-    bed_id,
-    branch_id,
-    room_id,
-    room_number,
-
-    first_name,
-    last_name,
-    profile_image,
-
-    phone,
-    email,
-    password,
-
-    gender,
-    dob,
-    marital_status,
-    profession,
-
-    document_image,
-
-    address,
-    state,
-    district,
-    pincode,
-
-    college_name,
-
-    registration_date,
-    accommodation_date,
-
-    father_name,
-    father_contact,
-    father_occupation,
-
-    mother_name,
-    mother_contact,
-    mother_occupation,
-
-    guardian_name,
-    guardian_relation,
-    guardian_contact,
-
-    security_deposit,
-    emergency_contact,
+    bed_id, branch_id, room_id, room_number,
+    first_name, last_name, profile_image,
+    phone, email, password,
+    gender, dob, marital_status, profession,
+    document_image, address, state, district, pincode,
+    college_name, registration_date, accommodation_date,
+    father_name, father_contact, father_occupation,
+    mother_name, mother_contact, mother_occupation,
+    guardian_name, guardian_relation, guardian_contact,
+    security_deposit, emergency_contact,
   } = payload;
 
   if (!bed_id || !branch_id || !room_id || !first_name || !last_name || !phone) {
@@ -73,58 +166,60 @@ export async function createTenant(payload) {
     throw error;
   }
 
+  const roomRent = await rentDueModel.getRoomMonthlyRent(room_id);
+  if (roomRent === null) {
+    const error = new Error("Room rent not set, cannot create tenant");
+    error.statusCode = 400;
+    throw error;
+  }
+
   const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
 
-  const result = await tenantModel.createTenantQuery({
-    bed_id,
-    branch_id,
-    room_id,
-    room_number,
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
 
-    first_name,
-    last_name,
-    profile_image,
+    const [tenantResult] = await connection.execute(
+      `INSERT INTO tenants 
+        (bed_id, branch_id, room_id, room_number, first_name, last_name, profile_image,
+         phone, email, password_hash, gender, dob, marital_status, profession,
+         document_image, address, state, district, pincode, college_name,
+         registration_date, accommodation_date, father_name, father_contact, father_occupation,
+         mother_name, mother_contact, mother_occupation, guardian_name, guardian_relation,
+         guardian_contact, security_deposit, emergency_contact)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [bed_id, branch_id, room_id, room_number, first_name, last_name, profile_image,
+       phone, email, hashedPassword, gender, dob, marital_status, profession,
+       document_image, address, state, district, pincode, college_name,
+       registration_date, accommodation_date, father_name, father_contact, father_occupation,
+       mother_name, mother_contact, mother_occupation, guardian_name, guardian_relation,
+       guardian_contact, security_deposit, emergency_contact]
+    );
 
-    phone,
-    email,
-    password_hash: hashedPassword,
+    const tenant_id = tenantResult.insertId;
 
-    gender,
-    dob,
-    marital_status,
-    profession,
+    await connection.execute(
+      `UPDATE beds SET status = 'occupied' WHERE bed_id = ?`,
+      [bed_id]
+    );
 
-    document_image,
+    const billing_month = toBillingMonth(accommodation_date);
 
-    address,
-    state,
-    district,
-    pincode,
+    await connection.execute(
+      `INSERT INTO rent_dues (tenant_id, branch_id, room_id, bed_id, billing_month, amount_due, status)
+       VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
+      [tenant_id, branch_id, room_id, bed_id, billing_month, roomRent]
+    );
 
-    college_name,
+    await connection.commit();
 
-    registration_date,
-    accommodation_date,
-
-    father_name,
-    father_contact,
-    father_occupation,
-
-    mother_name,
-    mother_contact,
-    mother_occupation,
-
-    guardian_name,
-    guardian_relation,
-    guardian_contact,
-
-    security_deposit,
-    emergency_contact,
-  });
-
-  await tenantModel.updateBedStatusQuery(bed_id, "occupied");
-
-  return await tenantModel.getTenantByIdQuery(result.insertId);
+    return await tenantModel.getTenantByIdQuery(tenant_id);
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
 /*===========================================================================
