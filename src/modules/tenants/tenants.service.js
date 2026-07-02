@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import * as tenantModel from "./tenants.model.js";
 import * as rentDueModel from "../payments/rentDue.model.js";
+import db from "../../common/config/db.js";
 
 function toBillingMonth(date) {
   const d = new Date(date);
